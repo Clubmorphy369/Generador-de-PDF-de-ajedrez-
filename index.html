@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>ChessExtract Pro - Extractor de Tableros de Ajedrez</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== VARIABLES ===== */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --gray: #95a5a6;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            --touch-min-size: 44px;
+        }
+
+        /* ===== RESET ===== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            padding: clamp(10px, 2vw, 30px);
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: clamp(15px, 3vw, 40px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        /* ===== HEADER ===== */
+        .app-header {
+            text-align: center;
+            margin-bottom: clamp(20px, 4vw, 40px);
+            padding-bottom: clamp(15px, 2vw, 25px);
+            border-bottom: 1px solid var(--light);
+        }
+
+        .app-header h1 {
+            color: var(--primary);
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 10px 15px;
+        }
+
+        .app-header p {
+            color: var(--gray);
+            font-size: clamp(0.95rem, 1.5vw, 1.2rem);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            margin-bottom: clamp(20px, 3vw, 30px);
+            padding: clamp(15px, 2.5vw, 30px);
+            border-radius: var(--border-radius);
+            background-color: white;
+            box-shadow: var(--box-shadow);
+            border-left: 4px solid var(--secondary);
+            transition: var(--transition);
+        }
+
+        @media (hover: hover) {
+            .card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            flex-wrap: wrap;
+        }
+
+        .card-header i {
+            font-size: clamp(1.3rem, 2vw, 1.8rem);
+            color: var(--secondary);
+        }
+
+        .card-header h2 {
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            font-weight: 600;
+        }
+
+        /* ===== INSTRUCCIONES ===== */
+        .instructions {
+            background-color: #e7f5ff;
+            padding: clamp(15px, 2vw, 25px);
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .instructions ol {
+            padding-left: clamp(18px, 2vw, 30px);
+            margin-top: 10px;
+        }
+        .instructions li {
+            margin-bottom: 6px;
+        }
+
+        /* ===== BOTONES ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            gap: 8px;
+            min-height: var(--touch-min-size);
+            min-width: var(--touch-min-size);
+            text-align: center;
+            line-height: 1.2;
+            touch-action: manipulation;
+        }
+
+        @media (hover: hover) {
+            .btn:hover {
+                background-color: var(--primary);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        .btn:disabled {
+            background-color: var(--gray);
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-danger { background-color: var(--accent); }
+        .btn-warning { background-color: var(--warning); }
+        .btn-success { background-color: var(--success); }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+        }
+        @media (hover: hover) {
+            .btn-outline:hover {
+                background-color: var(--secondary);
+                color: white;
+            }
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            min-height: 36px;
+        }
+
+        /* ===== CONTROLES ===== */
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: var(--transition);
+            min-height: var(--touch-min-size);
+            touch-action: manipulation;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        /* ===== CROP CONTAINER ===== */
+        #cropContainer {
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            background: #f9f9f9;
+            touch-action: none;
+            overscroll-behavior: contain;
+        }
+
+        #imageToCrop {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            user-select: none;
+            -webkit-user-drag: none;
+            -webkit-touch-callout: none;
+        }
+
+        .crop-box {
+            position: absolute;
+            border: 3px solid var(--secondary);
+            background-color: rgba(52, 152, 219, 0.15);
+            cursor: move;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+            touch-action: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            will-change: left, top, width, height;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--secondary);
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            touch-action: none;
+            -webkit-touch-callout: none;
+        }
+
+        @media (pointer: coarse) {
+            .resize-handle {
+                width: 28px;
+                height: 28px;
+            }
+            .resize-nw { top: -14px; left: -14px; }
+            .resize-ne { top: -14px; right: -14px; }
+            .resize-sw { bottom: -14px; left: -14px; }
+            .resize-se { bottom: -14px; right: -14px; }
+        }
+
+        .resize-nw { top: -10px; left: -10px; cursor: nw-resize; }
+        .resize-ne { top: -10px; right: -10px; cursor: ne-resize; }
+        .resize-sw { bottom: -10px; left: -10px; cursor: sw-resize; }
+        .resize-se { bottom: -10px; right: -10px; cursor: se-resize; }
+
+        /* ===== IMAGE COUNTER ===== */
+        .image-counter {
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 500;
+            padding: 10px;
+            background-color: var(--light);
+            border-radius: var(--border-radius);
+        }
+
+        /* ===== QUALITY CONTROLS ===== */
+        .quality-control {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 15px;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .quality-slider {
+            flex: 1;
+            min-width: 120px;
+            min-height: var(--touch-min-size);
+            touch-action: manipulation;
+        }
+
+        .quality-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* ===== TEMPLATE / AUTO ===== */
+        .template-section,
+        .auto-process-section {
+            margin: 20px 0;
+            padding: clamp(15px, 2vw, 25px);
+            border-radius: var(--border-radius);
+        }
+        .template-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--warning);
+        }
+        .auto-process-section {
+            background-color: #e8f5e9;
+            border-left: 4px solid var(--success);
+        }
+
+        .template-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        /* ===== NAVEGACIÓN ===== */
+        .navigation-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .navigation-buttons .btn {
+            flex: 1 1 150px;
+        }
+
+        /* ===== GRID TABLEROS ===== */
+        .chessboards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: clamp(15px, 2vw, 25px);
+            margin-top: 20px;
+        }
+
+        .chessboard-item {
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            background: white;
+        }
+        @media (hover: hover) {
+            .chessboard-item:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        .chessboard-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            background-color: #f8f9fa;
+            padding: 8px;
+        }
+
+        .chessboard-actions {
+            display: flex;
+            padding: 8px;
+            background-color: #f8f9fa;
+            justify-content: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .chessboard-actions .btn {
+            flex: 1 1 40px;
+            min-height: 40px;
+            padding: 4px 8px;
+        }
+
+        .chessboard-info {
+            padding: 8px;
+            text-align: center;
+            font-weight: 500;
+            background-color: var(--light);
+            font-size: 0.9rem;
+        }
+
+        /* ===== PDF PREVIEW ===== */
+        .pdf-preview {
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            padding: clamp(10px, 1.5vw, 20px);
+            background-color: white;
+            border-radius: var(--border-radius);
+            overflow-x: auto;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            page-break-after: always;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-content {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: clamp(10px, 1.5vw, 20px);
+            flex: 1;
+        }
+
+        .page-cell {
+            border: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            background-color: #fafafa;
+            border-radius: 4px;
+            min-height: 130px;
+        }
+        .page-cell img {
+            max-width: 70%;
+            max-height: 70%;
+            margin-bottom: 5px;
+        }
+
+        .page-header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 12px;
+            padding: 5px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+        }
+
+        .page-footer {
+            text-align: center;
+            margin-top: 12px;
+            padding: 5px 8px;
+            font-size: 0.9rem;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .answer-lines {
+            width: 100%;
+            margin-top: 4px;
+        }
+        .line {
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 4px;
+            height: 6px;
+            width: 100%;
+        }
+
+        /* ===== UTILIDADES ===== */
+        .hidden { display: none !important; }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: var(--success);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+            max-width: 90vw;
+        }
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .badge-primary { background-color: var(--secondary); color: white; }
+        .badge-light { background-color: var(--light); color: var(--dark); }
+
+        .section-title {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            margin-right: 8px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* ===== FOCUS VISIBLE ===== */
+        .btn:focus-visible,
+        .form-control:focus-visible,
+        input:focus-visible {
+            outline: 3px solid #0066ff;
+            outline-offset: 2px;
+        }
+              /* ===== RESPONSIVE TÁCTIL ===== */
+        @media (pointer: coarse) {
+            .btn {
+                padding: 14px 24px;
+                font-size: 1.1rem;
+                min-height: 52px;
+            }
+            .btn-sm {
+                padding: 10px 16px;
+                font-size: 1rem;
+                min-height: 44px;
+            }
+            .form-control {
+                padding: 14px 18px;
+                font-size: 1.1rem;
+                min-height: 52px;
+            }
+            .quality-control {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .navigation-buttons .btn {
+                flex: 1 1 100%;
+            }
+            .template-buttons .btn {
+                flex: 1 1 100%;
+            }
+            .chessboards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            .page-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .page-cell {
+                min-height: 100px;
+            }
+        }
+
+        /* ===== PANTALLAS PEQUEÑAS ===== */
+        @media (max-width: 640px) {
+            .app-container {
+                padding: 10px;
+            }
+            .chessboards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+            }
+            .page-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+            .page-cell {
+                min-height: 80px;
+                padding: 4px;
+            }
+            .page-cell img {
+                max-width: 60%;
+                max-height: 60%;
+            }
+            .navigation-buttons {
+                flex-direction: column;
+            }
+            .card-header h2 {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* ===== PANTALLAS GRANDES ===== */
+        @media (min-width: 1400px) {
+            .chessboards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+            .page-content {
+                gap: 25px;
+            }
+            .page-cell {
+                min-height: 200px;
+            }
+        }
+    </style>
+</head>
+  <body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1><i class="fas fa-chess-board"></i> ChessExtract Pro</h1>
+            <p>Herramienta profesional para extraer tableros de ajedrez de imágenes y generar ejercicios en PDF</p>
+        </header>
+
+        <div class="instructions">
+            <p><strong><i class="fas fa-info-circle"></i> Instrucciones:</strong></p>
+            <ol>
+                <li>Sube una o más capturas de pantalla que contengan tableros de ajedrez</li>
+                <li>Navega entre las imágenes usando los botones anterior/siguiente</li>
+                <li>Ajusta el recuadro para seleccionar solo el tablero (arrastra y usa las asas)</li>
+                <li>Guarda el recorte como plantilla si deseas aplicarlo a imágenes similares</li>
+                <li>Guarda el tablero recortado</li>
+                <li>Repite el proceso para agregar más tableros (máximo 6 por página PDF)</li>
+                <li>Genera y descarga el PDF con tus ejercicios en tamaño A4</li>
+            </ol>
+        </div>
+
+        <section class="card">
+            <div class="card-header">
+                <i class="fas fa-upload"></i>
+                <h2>Paso 1: Subir imágenes</h2>
+            </div>
+            <input type="file" id="imageInput" class="form-control" accept="image/*" multiple>
+            <button id="loadImageBtn" class="btn" disabled>
+                <i class="fas fa-images"></i> Cargar Imágenes
+            </button>
+        </section>
+
+        <section class="card hidden" id="cropSection">
+            <div class="card-header">
+                <i class="fas fa-crop-alt"></i>
+                <h2>Paso 2: Seleccionar tablero</h2>
+            </div>
+            <p>Arrastra y ajusta el recuadro para seleccionar solo el tablero de ajedrez</p>
+
+            <div class="image-counter" id="imageCounter">Imagen 1 de 1</div>
+
+            <div class="quality-control">
+                <span class="form-label">Calidad de imagen (para PDF):</span>
+                <input type="range" id="qualitySlider" class="quality-slider" min="0.5" max="1.0" step="0.1" value="0.7">
+                <span id="qualityValue" class="quality-value">0.7</span>
+            </div>
+
+            <div class="quality-control">
+                <span class="form-label">Resolución de imagen:</span>
+                <select id="resolutionSelect" class="form-control">
+                    <option value="1">Alta (recomendado para PDF)</option>
+                    <option value="0.75" selected>Media (equilibrio tamaño/calidad)</option>
+                    <option value="0.5">Baja (PDF más liviano)</option>
+                </select>
+            </div>
+
+            <div id="cropContainer">
+                <img id="imageToCrop" src="" alt="Imagen para recortar">
+                <div class="crop-box hidden">
+                    <div class="resize-handle resize-nw"></div>
+                    <div class="resize-handle resize-ne"></div>
+                    <div class="resize-handle resize-sw"></div>
+                    <div class="resize-handle resize-se"></div>
+                </div>
+            </div>
+
+            <div class="template-section">
+                <h3><i class="fas fa-clone"></i> Plantilla de recorte</h3>
+                <p>Si tienes múltiples imágenes con el mismo formato, puedes guardar este recorte como plantilla y aplicarlo a otras imágenes.</p>
+                <div class="template-buttons">
+                    <button id="saveTemplateBtn" class="btn btn-outline">
+                        <i class="fas fa-save"></i> Guardar recorte como plantilla
+                    </button>
+                    <button id="applyTemplateBtn" class="btn btn-outline" disabled>
+                        <i class="fas fa-paste"></i> Aplicar plantilla a esta imagen
+                    </button>
+                    <button id="applyToAllBtn" class="btn btn-outline" disabled>
+                        <i class="fas fa-clone"></i> Aplicar plantilla a todas las imágenes
+                    </button>
+                </div>
+            </div>
+
+            <div class="auto-process-section">
+                <h3><i class="fas fa-cogs"></i> Procesamiento automático</h3>
+                <p>Si todas tus imágenes tienen el mismo formato, puedes procesarlas automáticamente.</p>
+                <div class="template-buttons">
+                    <button id="processAllBtn" class="btn btn-success">
+                        <i class="fas fa-bolt"></i> Procesar todas las imágenes
+                    </button>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button id="prevImageBtn" class="btn" disabled>
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>
+                <button id="cropBtn" class="btn btn-success" disabled>
+                    <i class="fas fa-crop-alt"></i> Recortar y Guardar Tablero
+                </button>
+                <button id="nextImageBtn" class="btn" disabled>
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+
+        <section class="card hidden" id="previewSection">
+            <div class="section-title">
+                <div class="card-header">
+                    <i class="fas fa-check-circle"></i>
+                    <h2>Tableros guardados <span class="badge badge-primary" id="chessboardsCount">0</span></h2>
+                </div>
+                <button id="clearAllBtn" class="btn btn-danger btn-sm">
+                    <i class="fas fa-trash"></i> Eliminar todos
+                </button>
+            </div>
+            <div id="chessboards" class="chessboards-grid"></div>
+        </section>
+
+        <section class="card hidden" id="pdfSection">
+            <div class="card-header">
+                <i class="fas fa-file-pdf"></i>
+                <h2>Vista previa del PDF <span class="badge badge-light" id="pagesCount">1 página</span></h2>
+            </div>
+
+            <div class="pdf-controls">
+                <h3><i class="fas fa-sliders-h"></i> Personalizar PDF</h3>
+                <input type="text" id="headerInput" class="form-control" placeholder="Encabezado del PDF (opcional)">
+                <input type="text" id="footerInput" class="form-control" placeholder="Pie de página del PDF (opcional)">
+            </div>
+
+            <div id="pdfPreview" class="pdf-preview">
+                <!-- Las páginas se generan dinámicamente -->
+            </div>
+            <button id="generatePdfBtn" class="btn btn-success">
+                <i class="fas fa-download"></i> Generar y Descargar PDF
+            </button>
+        </section>
+    </div>
+
+    <div class="notification hidden" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notificationText">Tablero guardado correctamente</span>
+    </div>
+
+    <script>
+        // ===== VARIABLES GLOBALES =====
+        let originalImage = null;
+        let cropBox = null;
+        let isDragging = false;
+        let isResizing = false;
+        let resizeDirection = null;
+        let startX, startY;
+        let cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight;
+        let savedChessboards = [];
+        let imageQuality = 0.7;
+        let resolutionFactor = 0.75;
+        let editingIndex = -1;
+
+        let imageFiles = [];
+        let currentImageIndex = 0;
+
+        let cropTemplate = null;
+        let templateAppliedToAll = false;
+
+        // ===== DOM REFS =====
+        const imageInput = document.getElementById('imageInput');
+        const loadImageBtn = document.getElementById('loadImageBtn');
+        const cropSection = document.getElementById('cropSection');
+        const imageToCrop = document.getElementById('imageToCrop');
+        const cropContainer = document.getElementById('cropContainer');
+        const cropBtn = document.getElementById('cropBtn');
+        const prevImageBtn = document.getElementById('prevImageBtn');
+        const nextImageBtn = document.getElementById('nextImageBtn');
+        const imageCounter = document.getElementById('imageCounter');
+        const previewSection = document.getElementById('previewSection');
+        const chessboardsContainer = document.getElementById('chessboards');
+        const chessboardsCount = document.getElementById('chessboardsCount');
+        const pdfSection = document.getElementById('pdfSection');
+        const pdfPreview = document.getElementById('pdfPreview');
+        const pagesCount = document.getElementById('pagesCount');
+        const generatePdfBtn = document.getElementById('generatePdfBtn');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityValue = document.getElementById('qualityValue');
+        const resolutionSelect = document.getElementById('resolutionSelect');
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+        const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+        const applyTemplateBtn = document.getElementById('applyTemplateBtn');
+        const applyToAllBtn = document.getElementById('applyToAllBtn');
+        const headerInput = document.getElementById('headerInput');
+        const footerInput = document.getElementById('footerInput');
+        const processAllBtn = document.getElementById('processAllBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+
+        // ===== FUNCIONES DEL CROP BOX (con soporte táctil) =====
+        function initCropBox() {
+            cropBox = document.querySelector('.crop-box');
+            if (!cropBox) return;
+
+            // Si hay plantilla aplicada a todas, se usa
+            if (cropTemplate && templateAppliedToAll) {
+                applyCropTemplate();
+            } else if (!cropTemplate) {
+                const imgWidth = imageToCrop.width || 400;
+                const imgHeight = imageToCrop.height || 300;
+                cropBoxX = imgWidth * 0.25;
+                cropBoxY = imgHeight * 0.25;
+                cropBoxWidth = imgWidth * 0.5;
+                cropBoxHeight = imgHeight * 0.5;
+                updateCropBox();
+            }
+
+            // Eliminar listeners anteriores para evitar duplicados
+            const handles = cropBox.querySelectorAll('.resize-handle');
+            handles.forEach(handle => {
+                handle.removeEventListener('mousedown', startResize);
+                handle.removeEventListener('touchstart', startResizeTouch);
+                handle.addEventListener('mousedown', startResize);
+                handle.addEventListener('touchstart', startResizeTouch, { passive: false });
+            });
+
+            cropBox.removeEventListener('mousedown', startDrag);
+            cropBox.removeEventListener('touchstart', startDragTouch);
+            cropBox.addEventListener('mousedown', startDrag);
+            cropBox.addEventListener('touchstart', startDragTouch, { passive: false });
+
+            // Listeners globales para ratón y táctil
+            document.removeEventListener('mousemove', handleMove);
+            document.removeEventListener('mouseup', stopInteraction);
+            document.removeEventListener('touchmove', handleMoveTouch);
+            document.removeEventListener('touchend', stopInteractionTouch);
+            document.removeEventListener('touchcancel', stopInteractionTouch);
+
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', stopInteraction);
+            document.addEventListener('touchmove', handleMoveTouch, { passive: false });
+            document.addEventListener('touchend', stopInteractionTouch);
+            document.addEventListener('touchcancel', stopInteractionTouch);
+
+            cropBox.classList.remove('hidden');
+            cropBtn.disabled = false;
+            updateTemplateButtons();
+        }
+
+        function updateCropBox() {
+            if (!cropBox) return;
+            cropBox.style.left = cropBoxX + 'px';
+            cropBox.style.top = cropBoxY + 'px';
+            cropBox.style.width = cropBoxWidth + 'px';
+            cropBox.style.height = cropBoxHeight + 'px';
+        }
+              // ===== RECALCULAR CROP BOX AL CAMBIAR TAMAÑO / ORIENTACIÓN =====
+        function recalcCropBox() {
+            if (!cropTemplate || !cropBox) return;
+            const imgW = imageToCrop.width;
+            const imgH = imageToCrop.height;
+            if (imgW === 0 || imgH === 0) return;
+            cropBoxX = cropTemplate.x * imgW;
+            cropBoxY = cropTemplate.y * imgH;
+            cropBoxWidth = cropTemplate.width * imgW;
+            cropBoxHeight = cropTemplate.height * imgH;
+            updateCropBox();
+        }
+
+        // Listeners para recalcular
+        window.addEventListener('resize', recalcCropBox);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(recalcCropBox, 300);
+        });
+
+        // ===== RECORTAR IMAGEN =====
+        function cropImage() {
+            if (!originalImage || !cropBox) return null;
+            const canvasWidth = cropBoxWidth * resolutionFactor;
+            const canvasHeight = cropBoxHeight * resolutionFactor;
+            const canvas = document.createElement('canvas');
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            const ctx = canvas.getContext('2d');
+
+            const scaleX = originalImage.width / imageToCrop.width;
+            const scaleY = originalImage.height / imageToCrop.height;
+
+            ctx.drawImage(
+                originalImage,
+                cropBoxX * scaleX, cropBoxY * scaleY,
+                cropBoxWidth * scaleX, cropBoxHeight * scaleY,
+                0, 0,
+                canvasWidth, canvasHeight
+            );
+            return canvas.toDataURL('image/jpeg', imageQuality);
+        }
+
+        // ===== NOTIFICACIONES =====
+        function showNotification(message) {
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            clearTimeout(window.notifTimeout);
+            window.notifTimeout = setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // ===== MANEJO DE TABLEROS =====
+        function addChessboard(dataUrl) {
+            if (editingIndex >= 0) {
+                savedChessboards[editingIndex] = dataUrl;
+                showNotification('Tablero actualizado correctamente');
+                editingIndex = -1;
+            } else {
+                savedChessboards.push(dataUrl);
+                showNotification('Tablero guardado correctamente');
+            }
+            updateChessboardsDisplay();
+            if (currentImageIndex < imageFiles.length - 1) {
+                nextImage();
+            } else {
+                resetCropSection();
+            }
+        }
+
+        function resetCropSection() {
+            cropSection.classList.add('hidden');
+            imageInput.value = '';
+            loadImageBtn.disabled = true;
+            imageFiles = [];
+            currentImageIndex = 0;
+            templateAppliedToAll = false;
+        }
+
+        function startEdit(index) {
+            editingIndex = index;
+            originalImage = new Image();
+            originalImage.onload = function() {
+                imageToCrop.src = savedChessboards[index];
+                cropSection.classList.remove('hidden');
+                setTimeout(initCropBox, 100);
+            };
+            originalImage.src = savedChessboards[index];
+        }
+
+        function updateChessboardsDisplay() {
+            chessboardsContainer.innerHTML = '';
+            chessboardsCount.textContent = savedChessboards.length;
+
+            savedChessboards.forEach((dataUrl, index) => {
+                const item = document.createElement('div');
+                item.className = 'chessboard-item';
+                item.innerHTML = `
+                    <img src="${dataUrl}" alt="Tablero ${index+1}" class="chessboard-img">
+                    <div class="chessboard-info">Tablero ${index+1}</div>
+                    <div class="chessboard-actions">
+                        <button class="btn btn-warning btn-sm replace-btn" data-index="${index}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm remove-btn" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                chessboardsContainer.appendChild(item);
+                item.querySelector('.remove-btn').addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.index);
+                    savedChessboards.splice(idx, 1);
+                    updateChessboardsDisplay();
+                    showNotification('Tablero eliminado');
+                });
+                item.querySelector('.replace-btn').addEventListener('click', function() {
+                    const idx = parseInt(this.dataset.index);
+                    startEdit(idx);
+                });
+            });
+
+            updatePdfPreview();
+            if (savedChessboards.length > 0) {
+                previewSection.classList.remove('hidden');
+                pdfSection.classList.remove('hidden');
+            } else {
+                previewSection.classList.add('hidden');
+                pdfSection.classList.add('hidden');
+            }
+        }
+
+        // ===== VISTA PREVIA DEL PDF =====
+        function updatePdfPreview() {
+            pdfPreview.innerHTML = '';
+            const itemsPerPage = 6;
+            const pageCount = Math.ceil(savedChessboards.length / itemsPerPage);
+            pagesCount.textContent = `${pageCount} ${pageCount === 1 ? 'página' : 'páginas'}`;
+
+            const headerText = headerInput.value;
+            const footerText = footerInput.value;
+
+            for (let p = 0; p < pageCount; p++) {
+                const page = document.createElement('div');
+                page.className = 'page';
+                if (headerText) {
+                    const h = document.createElement('div');
+                    h.className = 'page-header';
+                    h.textContent = headerText;
+                    page.appendChild(h);
+                }
+                const content = document.createElement('div');
+                content.className = 'page-content';
+
+                for (let i = 0; i < itemsPerPage; i++) {
+                    const idx = p * itemsPerPage + i;
+                    const cell = document.createElement('div');
+                    cell.className = 'page-cell';
+                    const num = document.createElement('div');
+                    num.textContent = `${idx+1}`;
+                    num.style.cssText = 'font-weight:bold; margin-bottom:2px;';
+                    cell.appendChild(num);
+                    if (idx < savedChessboards.length) {
+                        const img = document.createElement('img');
+                        img.src = savedChessboards[idx];
+                        img.loading = 'lazy';
+                        cell.appendChild(img);
+                        const lines = document.createElement('div');
+                        lines.className = 'answer-lines';
+                        for (let j = 0; j < 3; j++) {
+                            const line = document.createElement('div');
+                            line.className = 'line';
+                            lines.appendChild(line);
+                        }
+                        cell.appendChild(lines);
+                    }
+                    content.appendChild(cell);
+                }
+                page.appendChild(content);
+
+                const footer = document.createElement('div');
+                footer.className = 'page-footer';
+                const pNum = document.createElement('span');
+                pNum.textContent = `Página ${p+1}`;
+                footer.appendChild(pNum);
+                if (footerText) {
+                    const ft = document.createElement('span');
+                    ft.textContent = footerText;
+                    footer.appendChild(ft);
+                }
+                page.appendChild(footer);
+                pdfPreview.appendChild(page);
+            }
+        }
+
+        // ===== GENERAR PDF =====
+        function generatePdf() {
+            if (savedChessboards.length === 0) return;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const itemsPerPage = 6;
+            const pageCount = Math.ceil(savedChessboards.length / itemsPerPage);
+            const imgWidth = 58.5;
+            const imgHeight = 58.5;
+            const positions = [
+                { x: 27, y: 40 }, { x: 122, y: 40 },
+                { x: 27, y: 120 }, { x: 122, y: 120 },
+                { x: 27, y: 200 }, { x: 122, y: 200 }
+            ];
+            const headerText = headerInput.value;
+            const footerText = footerInput.value;
+
+            for (let i = 0; i < savedChessboards.length; i++) {
+                const pageIdx = Math.floor(i / itemsPerPage);
+                const posIdx = i % itemsPerPage;
+                if (posIdx === 0 && i > 0) doc.addPage();
+
+                if (headerText) {
+                    doc.setFontSize(12);
+                    doc.text(headerText, 105, 20, { align: 'center' });
+                }
+                const cx = positions[posIdx].x + imgWidth / 2;
+                doc.setFontSize(12);
+                doc.text(`${i+1}`, cx, positions[posIdx].y - 2.5, { align: 'center' });
+                doc.addImage(
+                    savedChessboards[i],
+                    'JPEG',
+                    positions[posIdx].x,
+                    positions[posIdx].y,
+                    imgWidth,
+                    imgHeight,
+                    undefined,
+                    'FAST'
+                );
+                const lineY = positions[posIdx].y + imgHeight + 6;
+                for (let j = 0; j < 3; j++) {
+                    doc.line(
+                        positions[posIdx].x,
+                        lineY + j * 4,
+                        positions[posIdx].x + imgWidth,
+                        lineY + j * 4
+                    );
+                }
+                if (footerText) {
+                    doc.setFontSize(10);
+                    doc.text(footerText, 105, 287, { align: 'center' });
+                }
+            }
+            doc.save('ejercicios_ajedrez.pdf');
+            showNotification('PDF generado y descargado');
+        }
+
+        // ===== NAVEGACIÓN DE IMÁGENES =====
+        function loadCurrentImage() {
+            if (imageFiles.length === 0) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                originalImage = new Image();
+                originalImage.onload = function() {
+                    imageToCrop.src = e.target.result;
+                    setTimeout(initCropBox, 100);
+                };
+                originalImage.src = e.target.result;
+            };
+            reader.readAsDataURL(imageFiles[currentImageIndex]);
+            imageCounter.textContent = `Imagen ${currentImageIndex+1} de ${imageFiles.length}`;
+            prevImageBtn.disabled = currentImageIndex === 0;
+            nextImageBtn.disabled = currentImageIndex === imageFiles.length - 1;
+        }
+
+        function prevImage() {
+            if (currentImageIndex > 0) { currentImageIndex--; loadCurrentImage(); }
+        }
+        function nextImage() {
+            if (currentImageIndex < imageFiles.length - 1) { currentImageIndex++; loadCurrentImage(); }
+        }
+
+        // ===== PLANTILLAS =====
+        function saveCropTemplate() {
+            if (!cropBox) return;
+            const imgW = imageToCrop.width;
+            const imgH = imageToCrop.height;
+            cropTemplate = {
+                x: cropBoxX / imgW,
+                y: cropBoxY / imgH,
+                width: cropBoxWidth / imgW,
+                height: cropBoxHeight / imgH
+            };
+            showNotification('Plantilla guardada');
+            updateTemplateButtons();
+        }
+
+        function applyCropTemplate() {
+            if (!cropTemplate) return;
+            const imgW = imageToCrop.width;
+            const imgH = imageToCrop.height;
+            cropBoxX = cropTemplate.x * imgW;
+            cropBoxY = cropTemplate.y * imgH;
+            cropBoxWidth = cropTemplate.width * imgW;
+            cropBoxHeight = cropTemplate.height * imgH;
+            updateCropBox();
+            showNotification('Plantilla aplicada a esta imagen');
+        }
+
+        function applyTemplateToAll() {
+            if (!cropTemplate) return;
+            templateAppliedToAll = true;
+            applyCropTemplate();
+            showNotification('Plantilla aplicada a todas las imágenes');
+        }
+
+        function updateTemplateButtons() {
+            applyTemplateBtn.disabled = !cropTemplate;
+            applyToAllBtn.disabled = !cropTemplate;
+        }
+
+        // ===== PROCESAR TODAS =====
+        function processAllImages() {
+            if (imageFiles.length === 0) return;
+            if (cropTemplate) templateAppliedToAll = true;
+
+            const processNext = (index) => {
+                if (index >= imageFiles.length) {
+                    showNotification('Todas las imágenes procesadas');
+                    return;
+                }
+                currentImageIndex = index;
+                loadCurrentImage();
+                setTimeout(() => {
+                    const data = cropImage();
+                    if (data) {
+                        savedChessboards.push(data);
+                        updateChessboardsDisplay();
+                        processNext(index + 1);
+                    }
+                }, 500);
+            };
+            processNext(0);
+        }
+
+        function clearAllChessboards() {
+            if (savedChessboards.length === 0) return;
+            if (confirm('¿Eliminar todos los tableros guardados?')) {
+                savedChessboards = [];
+                updateChessboardsDisplay();
+                showNotification('Todos los tableros eliminados');
+            }
+        }
+
+        // ===== EVENT LISTENERS =====
+        imageInput.addEventListener('change', function() {
+            loadImageBtn.disabled = !this.files || this.files.length === 0;
+            if (this.files && this.files.length > 0) {
+                imageFiles = Array.from(this.files);
+            }
+        });
+
+        loadImageBtn.addEventListener('click', function() {
+            if (imageFiles.length === 0) return;
+            cropSection.classList.remove('hidden');
+            loadCurrentImage();
+        });
+
+        cropBtn.addEventListener('click', function() {
+            const data = cropImage();
+            if (data) {
+                addChessboard(data);
+                previewSection.classList.remove('hidden');
+            }
+        });
+
+        prevImageBtn.addEventListener('click', prevImage);
+        nextImageBtn.addEventListener('click', nextImage);
+        generatePdfBtn.addEventListener('click', generatePdf);
+
+        qualitySlider.addEventListener('input', function() {
+            imageQuality = parseFloat(this.value);
+            qualityValue.textContent = this.value;
+        });
+        resolutionSelect.addEventListener('change', function() {
+            resolutionFactor = parseFloat(this.value);
+        });
+
+        saveTemplateBtn.addEventListener('click', saveCropTemplate);
+        applyTemplateBtn.addEventListener('click', applyCropTemplate);
+        applyToAllBtn.addEventListener('click', applyTemplateToAll);
+        processAllBtn.addEventListener('click', processAllImages);
+        clearAllBtn.addEventListener('click', clearAllChessboards);
+
+        headerInput.addEventListener('input', updatePdfPreview);
+        footerInput.addEventListener('input', updatePdfPreview);
+    </script>
+</body>
+</html>
+  
