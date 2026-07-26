@@ -215,7 +215,7 @@
             color: var(--dark);
         }
 
-        /* ===== DIAGNÓSTICO ===== */
+        /* ===== DIAGNÓSTICO MEJORADO ===== */
         #diagnostic {
             background: #f8f9fa;
             border: 1px solid #ddd;
@@ -231,6 +231,9 @@
         #diagnostic strong {
             color: var(--primary);
         }
+        .diag-ok { color: #155724; background: #d4edda; padding: 2px 8px; border-radius: 4px; }
+        .diag-error { color: #721c24; background: #f8d7da; padding: 2px 8px; border-radius: 4px; }
+        .diag-warning { color: #856404; background: #fff3cd; padding: 2px 8px; border-radius: 4px; }
 
         /* ===== CROP CONTAINER ===== */
         #cropContainer {
@@ -659,10 +662,10 @@
             ⚠️ Algunas librerías necesarias no se cargaron (revisa tu conexión a internet o si algo está bloqueando cdnjs.cloudflare.com). Recarga la página; si el problema sigue, algunos botones no funcionarán.
         </div>
 
-        <!-- ===== DIAGNÓSTICO DE ESTADO ===== -->
+        <!-- ===== DIAGNÓSTICO DE ESTADO MEJORADO ===== -->
         <div id="diagnostic">
             <strong>🔍 Diagnóstico:</strong><br>
-            <span id="diagStatus">Inicializando...</span>
+            <span id="diagStatus">Cargando...</span>
         </div>
 
         <header class="app-header">
@@ -858,18 +861,41 @@
         const libError = document.getElementById('libError');
         const diagStatus = document.getElementById('diagStatus');
 
-        // ===== DIAGNÓSTICO =====
+        // ===== DIAGNÓSTICO MEJORADO =====
         function updateDiagnostic() {
             const filesCount = imageFiles.length;
+            const inputFilesCount = imageInput.files ? imageInput.files.length : 0;
             const loadDisabled = loadImageBtn.disabled;
             const cropHidden = cropSection.classList.contains('hidden');
             const savedCount = savedChessboards.length;
-            diagStatus.innerHTML = `
-                <strong>Archivos seleccionados:</strong> ${filesCount} &nbsp;|&nbsp;
-                <strong>Botón "Cargar":</strong> ${loadDisabled ? '🔴 Deshabilitado' : '🟢 Habilitado'} &nbsp;|&nbsp;
-                <strong>Sección recorte:</strong> ${cropHidden ? '⬛ Oculto' : '🟩 Visible'} &nbsp;|&nbsp;
-                <strong>Tableros guardados:</strong> ${savedCount}
+
+            let statusHTML = `
+                <strong>📁 Archivos en memoria (imageFiles):</strong> ${filesCount} &nbsp;|&nbsp;
+                <strong>📂 Archivos en input (input.files):</strong> ${inputFilesCount} &nbsp;|&nbsp;
+                <strong>🔘 Botón "Cargar":</strong> ${loadDisabled ? '🔴 Deshabilitado' : '🟢 Habilitado'} &nbsp;|&nbsp;
+                <strong>📐 Sección recorte:</strong> ${cropHidden ? '⬛ Oculto' : '🟩 Visible'} &nbsp;|&nbsp;
+                <strong>♟️ Tableros guardados:</strong> ${savedCount}
             `;
+
+            // Agregar advertencia si hay inconsistencia
+            if (inputFilesCount > 0 && filesCount === 0) {
+                statusHTML += `<br><span class="diag-warning">⚠️ Hay archivos en input pero no en imageFiles. Ejecutando recuperación automática...</span>`;
+                // Intento de recuperación
+                setTimeout(() => {
+                    if (imageInput.files && imageInput.files.length > 0) {
+                        imageFiles = Array.from(imageInput.files);
+                        loadImageBtn.disabled = false;
+                        showNotification(`✅ Recuperados ${imageFiles.length} archivo(s) automáticamente`);
+                        updateDiagnostic();
+                    }
+                }, 100);
+            }
+
+            if (filesCount === 0 && inputFilesCount === 0) {
+                statusHTML += `<br><span class="diag-warning">💡 Selecciona imágenes usando el botón "Examinar"</span>`;
+            }
+
+            diagStatus.innerHTML = statusHTML;
         }
 
         // Actualizar diagnóstico cada 2 segundos
@@ -1142,9 +1168,7 @@
 
         function resetCropSection() {
             cropSection.classList.add('hidden');
-            imageInput.value = '';
-            loadImageBtn.disabled = true;
-            imageFiles = [];
+            // No limpiamos imageInput ni imageFiles para poder reutilizar
             currentImageIndex = 0;
             templateAppliedToAll = false;
             updateDiagnostic();
@@ -1441,10 +1465,8 @@
         function addSafeListener(element, event, handler) {
             if (!element) return;
             element.addEventListener(event, handler);
-            // En móviles, a veces el click no se dispara, añadimos touchstart como respaldo
             if (event === 'click') {
                 element.addEventListener('touchstart', function(e) {
-                    // Solo si el botón no está deshabilitado y no se ha hecho click aún
                     if (!this.disabled) {
                         handler.call(this, e);
                     }
@@ -1452,30 +1474,56 @@
             }
         }
 
-        // ===== EVENT LISTENERS CON SEGURIDAD =====
+        // ===== EVENT LISTENERS MEJORADOS =====
+        // Evento change del input: detecta archivos
         addSafeListener(imageInput, 'change', function() {
             const hasFiles = this.files && this.files.length > 0;
-            loadImageBtn.disabled = !hasFiles;
             if (hasFiles) {
                 imageFiles = Array.from(this.files);
+                loadImageBtn.disabled = false;
                 showNotification(`✅ ${imageFiles.length} imagen(es) seleccionada(s)`);
                 updateDiagnostic();
             } else {
                 imageFiles = [];
+                loadImageBtn.disabled = true;
                 updateDiagnostic();
             }
         });
 
+        // Evento click del botón "Cargar Imágenes" con verificación extra
         addSafeListener(loadImageBtn, 'click', function() {
+            // Verificar si hay archivos en el input aunque imageFiles esté vacío
+            if (imageFiles.length === 0 && imageInput.files && imageInput.files.length > 0) {
+                imageFiles = Array.from(imageInput.files);
+                loadImageBtn.disabled = false;
+                showNotification(`✅ Recuperados ${imageFiles.length} archivo(s) automáticamente`);
+                updateDiagnostic();
+            }
+
             if (imageFiles.length === 0) {
-                showNotification('⚠️ Primero selecciona imágenes.');
+                showNotification('⚠️ Primero selecciona imágenes usando "Examinar".');
                 return;
             }
+
             cropSection.classList.remove('hidden');
             loadCurrentImage();
             updateDiagnostic();
         });
 
+        // Clic en el input file (para móviles que no disparan change bien)
+        imageInput.addEventListener('click', function() {
+            // Forzamos una comprobación después de un breve retraso
+            setTimeout(() => {
+                if (this.files && this.files.length > 0) {
+                    imageFiles = Array.from(this.files);
+                    loadImageBtn.disabled = false;
+                    showNotification(`✅ ${imageFiles.length} imagen(es) seleccionada(s)`);
+                    updateDiagnostic();
+                }
+            }, 500);
+        });
+
+        // Resto de botones
         addSafeListener(cropBtn, 'click', function() {
             const data = cropImage();
             if (data) {
@@ -1519,7 +1567,7 @@
 
         console.log('✅ ChessExtract Pro cargado correctamente.');
         console.log('📱 Dispositivo táctil:', 'ontouchstart' in window);
-        console.log('📦 Archivos seleccionados:', imageFiles.length);
+        console.log('📦 Archivos en input:', imageInput.files ? imageInput.files.length : 0);
     </script>
 </body>
 </html>
