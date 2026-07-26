@@ -149,6 +149,7 @@
             text-align: center;
             line-height: 1.2;
             touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         @media (hover: hover) {
@@ -164,6 +165,7 @@
             cursor: not-allowed;
             transform: none !important;
             box-shadow: none !important;
+            opacity: 0.6;
         }
 
         .btn-danger { background-color: var(--accent); }
@@ -211,6 +213,23 @@
             margin-bottom: 8px;
             font-weight: 500;
             color: var(--dark);
+        }
+
+        /* ===== DIAGNÓSTICO ===== */
+        #diagnostic {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            font-family: monospace;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        #diagnostic strong {
+            color: var(--primary);
         }
 
         /* ===== CROP CONTAINER ===== */
@@ -640,6 +659,12 @@
             ⚠️ Algunas librerías necesarias no se cargaron (revisa tu conexión a internet o si algo está bloqueando cdnjs.cloudflare.com). Recarga la página; si el problema sigue, algunos botones no funcionarán.
         </div>
 
+        <!-- ===== DIAGNÓSTICO DE ESTADO ===== -->
+        <div id="diagnostic">
+            <strong>🔍 Diagnóstico:</strong><br>
+            <span id="diagStatus">Inicializando...</span>
+        </div>
+
         <header class="app-header">
             <h1><i class="fas fa-chess-board"></i> ChessExtract Pro</h1>
             <p>Herramienta profesional para extraer tableros de ajedrez de imágenes y generar ejercicios en PDF</p>
@@ -831,8 +856,26 @@
         const processAllBtn = document.getElementById('processAllBtn');
         const clearAllBtn = document.getElementById('clearAllBtn');
         const libError = document.getElementById('libError');
+        const diagStatus = document.getElementById('diagStatus');
 
-        // Si jsPDF no llegó a cargar, mostramos aviso
+        // ===== DIAGNÓSTICO =====
+        function updateDiagnostic() {
+            const filesCount = imageFiles.length;
+            const loadDisabled = loadImageBtn.disabled;
+            const cropHidden = cropSection.classList.contains('hidden');
+            const savedCount = savedChessboards.length;
+            diagStatus.innerHTML = `
+                <strong>Archivos seleccionados:</strong> ${filesCount} &nbsp;|&nbsp;
+                <strong>Botón "Cargar":</strong> ${loadDisabled ? '🔴 Deshabilitado' : '🟢 Habilitado'} &nbsp;|&nbsp;
+                <strong>Sección recorte:</strong> ${cropHidden ? '⬛ Oculto' : '🟩 Visible'} &nbsp;|&nbsp;
+                <strong>Tableros guardados:</strong> ${savedCount}
+            `;
+        }
+
+        // Actualizar diagnóstico cada 2 segundos
+        setInterval(updateDiagnostic, 2000);
+
+        // ===== LIBRERÍAS =====
         if (window.__jspdfFallo || typeof window.jspdf === 'undefined') {
             libError.classList.remove('hidden');
         }
@@ -842,7 +885,6 @@
             cropBox = document.querySelector('.crop-box');
             if (!cropBox) return;
 
-            // Si hay plantilla aplicada a todas, se usa
             if (cropTemplate && templateAppliedToAll) {
                 applyCropTemplate();
             } else if (!cropTemplate) {
@@ -855,7 +897,6 @@
                 updateCropBox();
             }
 
-            // Eliminar listeners anteriores para evitar duplicados
             const handles = cropBox.querySelectorAll('.resize-handle');
             handles.forEach(handle => {
                 handle.removeEventListener('mousedown', startResize);
@@ -869,7 +910,6 @@
             cropBox.addEventListener('mousedown', startDrag);
             cropBox.addEventListener('touchstart', startDragTouch, { passive: false });
 
-            // Listeners globales para ratón y táctil
             document.removeEventListener('mousemove', handleMove);
             document.removeEventListener('mouseup', stopInteraction);
             document.removeEventListener('touchmove', handleMoveTouch);
@@ -943,7 +983,7 @@
             e.preventDefault();
         }
 
-        // ---- Movimiento (ratón) ----
+        // ---- Movimiento ----
         function handleMove(e) {
             if (!isDragging && !isResizing) return;
             const dx = e.clientX - startX;
@@ -953,7 +993,6 @@
             startY = e.clientY;
         }
 
-        // ---- Movimiento (táctil) ----
         function handleMoveTouch(e) {
             if (!isDragging && !isResizing) return;
             const touch = e.touches[0];
@@ -965,7 +1004,6 @@
             e.preventDefault();
         }
 
-        // ---- Lógica común de movimiento ----
         function performMove(dx, dy) {
             const imgW = imageToCrop.width || 400;
             const imgH = imageToCrop.height || 300;
@@ -1033,7 +1071,7 @@
             e.preventDefault();
         }
 
-        // ===== RECALCULAR CROP BOX AL CAMBIAR TAMAÑO / ORIENTACIÓN =====
+        // ===== RECALCULAR AL CAMBIAR TAMAÑO / ORIENTACIÓN =====
         function recalcCropBox() {
             if (!cropTemplate || !cropBox) return;
             const imgW = imageToCrop.width;
@@ -1046,7 +1084,6 @@
             updateCropBox();
         }
 
-        // Listeners para recalcular
         window.addEventListener('resize', recalcCropBox);
         window.addEventListener('orientationchange', function() {
             setTimeout(recalcCropBox, 300);
@@ -1110,6 +1147,7 @@
             imageFiles = [];
             currentImageIndex = 0;
             templateAppliedToAll = false;
+            updateDiagnostic();
         }
 
         function startEdit(index) {
@@ -1163,6 +1201,7 @@
                 previewSection.classList.add('hidden');
                 pdfSection.classList.add('hidden');
             }
+            updateDiagnostic();
         }
 
         // ===== VISTA PREVIA DEL PDF =====
@@ -1296,7 +1335,10 @@
 
         // ===== NAVEGACIÓN DE IMÁGENES =====
         function loadCurrentImage() {
-            if (imageFiles.length === 0) return;
+            if (imageFiles.length === 0) {
+                showNotification('⚠️ No hay imágenes cargadas.');
+                return;
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
                 originalImage = new Image();
@@ -1306,10 +1348,14 @@
                 };
                 originalImage.src = e.target.result;
             };
+            reader.onerror = function() {
+                showNotification('❌ Error al leer la imagen. Intenta con otra.');
+            };
             reader.readAsDataURL(imageFiles[currentImageIndex]);
             imageCounter.textContent = `Imagen ${currentImageIndex+1} de ${imageFiles.length}`;
             prevImageBtn.disabled = currentImageIndex === 0;
             nextImageBtn.disabled = currentImageIndex === imageFiles.length - 1;
+            updateDiagnostic();
         }
 
         function prevImage() {
@@ -1391,31 +1437,59 @@
             }
         }
 
-        // ===== EVENT LISTENERS =====
-        imageInput.addEventListener('change', function() {
-            loadImageBtn.disabled = !this.files || this.files.length === 0;
-            if (this.files && this.files.length > 0) {
+        // ===== FUNCIÓN PARA AGREGAR LISTENERS CON RESPUESTA TÁCTIL =====
+        function addSafeListener(element, event, handler) {
+            if (!element) return;
+            element.addEventListener(event, handler);
+            // En móviles, a veces el click no se dispara, añadimos touchstart como respaldo
+            if (event === 'click') {
+                element.addEventListener('touchstart', function(e) {
+                    // Solo si el botón no está deshabilitado y no se ha hecho click aún
+                    if (!this.disabled) {
+                        handler.call(this, e);
+                    }
+                }, { passive: true });
+            }
+        }
+
+        // ===== EVENT LISTENERS CON SEGURIDAD =====
+        addSafeListener(imageInput, 'change', function() {
+            const hasFiles = this.files && this.files.length > 0;
+            loadImageBtn.disabled = !hasFiles;
+            if (hasFiles) {
                 imageFiles = Array.from(this.files);
+                showNotification(`✅ ${imageFiles.length} imagen(es) seleccionada(s)`);
+                updateDiagnostic();
+            } else {
+                imageFiles = [];
+                updateDiagnostic();
             }
         });
 
-        loadImageBtn.addEventListener('click', function() {
-            if (imageFiles.length === 0) return;
+        addSafeListener(loadImageBtn, 'click', function() {
+            if (imageFiles.length === 0) {
+                showNotification('⚠️ Primero selecciona imágenes.');
+                return;
+            }
             cropSection.classList.remove('hidden');
             loadCurrentImage();
+            updateDiagnostic();
         });
 
-        cropBtn.addEventListener('click', function() {
+        addSafeListener(cropBtn, 'click', function() {
             const data = cropImage();
             if (data) {
                 addChessboard(data);
                 previewSection.classList.remove('hidden');
+                updateDiagnostic();
+            } else {
+                showNotification('❌ No se pudo recortar la imagen. Asegúrate de que el recuadro esté sobre la imagen.');
             }
         });
 
-        prevImageBtn.addEventListener('click', prevImage);
-        nextImageBtn.addEventListener('click', nextImage);
-        generatePdfBtn.addEventListener('click', generatePdf);
+        addSafeListener(prevImageBtn, 'click', prevImage);
+        addSafeListener(nextImageBtn, 'click', nextImage);
+        addSafeListener(generatePdfBtn, 'click', generatePdf);
 
         qualitySlider.addEventListener('input', function() {
             imageQuality = parseFloat(this.value);
@@ -1425,20 +1499,27 @@
             resolutionFactor = parseFloat(this.value);
         });
 
-        saveTemplateBtn.addEventListener('click', saveCropTemplate);
-        applyTemplateBtn.addEventListener('click', applyCropTemplate);
-        applyToAllBtn.addEventListener('click', applyTemplateToAll);
-        processAllBtn.addEventListener('click', processAllImages);
-        clearAllBtn.addEventListener('click', clearAllChessboards);
+        addSafeListener(saveTemplateBtn, 'click', saveCropTemplate);
+        addSafeListener(applyTemplateBtn, 'click', applyCropTemplate);
+        addSafeListener(applyToAllBtn, 'click', applyTemplateToAll);
+        addSafeListener(processAllBtn, 'click', processAllImages);
+        addSafeListener(clearAllBtn, 'click', clearAllChessboards);
 
         headerInput.addEventListener('input', updatePdfPreview);
         footerInput.addEventListener('input', updatePdfPreview);
 
-        // ===== RED DE SEGURIDAD: capturar errores no manejados =====
+        // ===== DIAGNÓSTICO INICIAL =====
+        updateDiagnostic();
+
+        // ===== CAPTURAR ERRORES =====
         window.addEventListener('error', function (e) {
             console.error('Error capturado:', e.error || e.message);
-            showNotification('❌ Ocurrió un error inesperado. Recarga la página; si continúa, revisa la consola (F12).');
+            showNotification('❌ Ocurrió un error inesperado. Revisa la consola (F12) para más detalles.');
         });
+
+        console.log('✅ ChessExtract Pro cargado correctamente.');
+        console.log('📱 Dispositivo táctil:', 'ontouchstart' in window);
+        console.log('📦 Archivos seleccionados:', imageFiles.length);
     </script>
 </body>
 </html>
