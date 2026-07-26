@@ -550,7 +550,8 @@
             outline: 3px solid #0066ff;
             outline-offset: 2px;
         }
-              /* ===== RESPONSIVE TÁCTIL ===== */
+
+        /* ===== RESPONSIVE TÁCTIL ===== */
         @media (pointer: coarse) {
             .btn {
                 padding: 14px 24px;
@@ -632,7 +633,7 @@
         }
     </style>
 </head>
-  <body>
+<body>
     <div class="app-container">
         <header class="app-header">
             <h1><i class="fas fa-chess-board"></i> ChessExtract Pro</h1>
@@ -657,9 +658,12 @@
                 <i class="fas fa-upload"></i>
                 <h2>Paso 1: Subir imágenes</h2>
             </div>
-            <input type="file" id="imageInput" class="form-control" accept="image/*" multiple>
-            <button id="loadImageBtn" class="btn" disabled>
-                <i class="fas fa-images"></i> Cargar Imágenes
+            <label for="imageInput" class="btn" style="display:inline-flex; cursor:pointer; width:100%; justify-content:center;">
+                <i class="fas fa-images"></i> Seleccionar imágenes
+            </label>
+            <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
+            <button id="loadImageBtn" class="btn" disabled style="margin-top:10px;">
+                <i class="fas fa-upload"></i> Cargar Imágenes
             </button>
         </section>
 
@@ -825,203 +829,197 @@
         const processAllBtn = document.getElementById('processAllBtn');
         const clearAllBtn = document.getElementById('clearAllBtn');
 
-            // ===== FUNCIONES DEL CROP BOX (con soporte táctil) =====
-function initCropBox() {
-    cropBox = document.querySelector('.crop-box');
-    if (!cropBox) return;
+        // ===== FUNCIONES DEL CROP BOX (con soporte táctil) =====
+        function initCropBox() {
+            cropBox = document.querySelector('.crop-box');
+            if (!cropBox) return;
 
-    // Si hay plantilla aplicada a todas, se usa
-    if (cropTemplate && templateAppliedToAll) {
-        applyCropTemplate();
-    } else if (!cropTemplate) {
-        const imgWidth = imageToCrop.width || 400;
-        const imgHeight = imageToCrop.height || 300;
-        cropBoxX = imgWidth * 0.25;
-        cropBoxY = imgHeight * 0.25;
-        cropBoxWidth = imgWidth * 0.5;
-        cropBoxHeight = imgHeight * 0.5;
-        updateCropBox();
-    }
+            if (cropTemplate && templateAppliedToAll) {
+                applyCropTemplate();
+            } else if (!cropTemplate) {
+                const imgWidth = imageToCrop.width || 400;
+                const imgHeight = imageToCrop.height || 300;
+                cropBoxX = imgWidth * 0.25;
+                cropBoxY = imgHeight * 0.25;
+                cropBoxWidth = imgWidth * 0.5;
+                cropBoxHeight = imgHeight * 0.5;
+                updateCropBox();
+            }
 
-    // Eliminar listeners anteriores (por si acaso)
-    const handles = cropBox.querySelectorAll('.resize-handle');
-    handles.forEach(handle => {
-        handle.removeEventListener('mousedown', startResize);
-        handle.removeEventListener('touchstart', startResizeTouch);
-        handle.addEventListener('mousedown', startResize);
-        handle.addEventListener('touchstart', startResizeTouch, { passive: false });
-    });
+            const handles = cropBox.querySelectorAll('.resize-handle');
+            handles.forEach(handle => {
+                handle.removeEventListener('mousedown', startResize);
+                handle.removeEventListener('touchstart', startResizeTouch);
+                handle.addEventListener('mousedown', startResize);
+                handle.addEventListener('touchstart', startResizeTouch, { passive: false });
+            });
 
-    cropBox.removeEventListener('mousedown', startDrag);
-    cropBox.removeEventListener('touchstart', startDragTouch);
-    cropBox.addEventListener('mousedown', startDrag);
-    cropBox.addEventListener('touchstart', startDragTouch, { passive: false });
+            cropBox.removeEventListener('mousedown', startDrag);
+            cropBox.removeEventListener('touchstart', startDragTouch);
+            cropBox.addEventListener('mousedown', startDrag);
+            cropBox.addEventListener('touchstart', startDragTouch, { passive: false });
 
-    document.removeEventListener('mousemove', handleMove);
-    document.removeEventListener('mouseup', stopInteraction);
-    document.removeEventListener('touchmove', handleMoveTouch);
-    document.removeEventListener('touchend', stopInteractionTouch);
-    document.removeEventListener('touchcancel', stopInteractionTouch);
+            document.removeEventListener('mousemove', handleMove);
+            document.removeEventListener('mouseup', stopInteraction);
+            document.removeEventListener('touchmove', handleMoveTouch);
+            document.removeEventListener('touchend', stopInteractionTouch);
+            document.removeEventListener('touchcancel', stopInteractionTouch);
 
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('mouseup', stopInteraction);
-    document.addEventListener('touchmove', handleMoveTouch, { passive: false });
-    document.addEventListener('touchend', stopInteractionTouch);
-    document.addEventListener('touchcancel', stopInteractionTouch);
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('mouseup', stopInteraction);
+            document.addEventListener('touchmove', handleMoveTouch, { passive: false });
+            document.addEventListener('touchend', stopInteractionTouch);
+            document.addEventListener('touchcancel', stopInteractionTouch);
 
-    cropBox.classList.remove('hidden');
-    cropBtn.disabled = false;
-    updateTemplateButtons();
-}
-
-function updateCropBox() {
-    if (!cropBox) return;
-    cropBox.style.left = cropBoxX + 'px';
-    cropBox.style.top = cropBoxY + 'px';
-    cropBox.style.width = cropBoxWidth + 'px';
-    cropBox.style.height = cropBoxHeight + 'px';
-}
-
-// ===== FUNCIONES DE RATÓN =====
-function startResize(e) {
-    const rect = cropContainer.getBoundingClientRect();
-    startX = e.clientX - rect.left;
-    startY = e.clientY - rect.top;
-    isResizing = true;
-    resizeDirection = e.target.classList.contains('resize-nw') ? 'nw' :
-                     e.target.classList.contains('resize-ne') ? 'ne' :
-                     e.target.classList.contains('resize-sw') ? 'sw' : 'se';
-    e.preventDefault();
-}
-
-function startDrag(e) {
-    const rect = cropContainer.getBoundingClientRect();
-    startX = e.clientX - rect.left - cropBoxX;
-    startY = e.clientY - rect.top - cropBoxY;
-    isDragging = true;
-    e.preventDefault();
-}
-
-function handleMove(e) {
-    if (!isDragging && !isResizing) return;
-    const rect = cropContainer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    applyMove(x, y);
-}
-
-function stopInteraction() {
-    isDragging = false;
-    isResizing = false;
-    resizeDirection = null;
-}
-
-// ===== FUNCIONES TÁCTILES =====
-function startResizeTouch(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const rect = cropContainer.getBoundingClientRect();
-    startX = touch.clientX - rect.left;
-    startY = touch.clientY - rect.top;
-    isResizing = true;
-    resizeDirection = e.target.classList.contains('resize-nw') ? 'nw' :
-                     e.target.classList.contains('resize-ne') ? 'ne' :
-                     e.target.classList.contains('resize-sw') ? 'sw' : 'se';
-}
-
-function startDragTouch(e) {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const rect = cropContainer.getBoundingClientRect();
-    startX = touch.clientX - rect.left - cropBoxX;
-    startY = touch.clientY - rect.top - cropBoxY;
-    isDragging = true;
-}
-
-function handleMoveTouch(e) {
-    e.preventDefault();
-    if (!isDragging && !isResizing) return;
-    const touch = e.touches[0];
-    const rect = cropContainer.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    applyMove(x, y);
-}
-
-function stopInteractionTouch(e) {
-    isDragging = false;
-    isResizing = false;
-    resizeDirection = null;
-}
-
-// ===== LÓGICA COMÚN PARA MOVER Y REDIMENSIONAR =====
-function applyMove(x, y) {
-    if (isDragging) {
-        let newX = x - startX;
-        let newY = y - startY;
-        newX = Math.max(0, Math.min(newX, imageToCrop.width - cropBoxWidth));
-        newY = Math.max(0, Math.min(newY, imageToCrop.height - cropBoxHeight));
-        cropBoxX = newX;
-        cropBoxY = newY;
-        updateCropBox();
-    } else if (isResizing) {
-        let newWidth = cropBoxWidth;
-        let newHeight = cropBoxHeight;
-        let newX = cropBoxX;
-        let newY = cropBoxY;
-
-        switch (resizeDirection) {
-            case 'se':
-                newWidth = x - cropBoxX;
-                newHeight = y - cropBoxY;
-                break;
-            case 'ne':
-                newWidth = x - cropBoxX;
-                newHeight = cropBoxY + cropBoxHeight - y;
-                newY = y;
-                break;
-            case 'sw':
-                newWidth = cropBoxX + cropBoxWidth - x;
-                newHeight = y - cropBoxY;
-                newX = x;
-                break;
-            case 'nw':
-                newWidth = cropBoxX + cropBoxWidth - x;
-                newHeight = cropBoxY + cropBoxHeight - y;
-                newX = x;
-                newY = y;
-                break;
+            cropBox.classList.remove('hidden');
+            cropBtn.disabled = false;
+            updateTemplateButtons();
         }
 
-        const minSize = 20;
-        newWidth = Math.max(minSize, Math.min(newWidth, imageToCrop.width - newX));
-        newHeight = Math.max(minSize, Math.min(newHeight, imageToCrop.height - newY));
-        cropBoxX = newX;
-        cropBoxY = newY;
-        cropBoxWidth = newWidth;
-        cropBoxHeight = newHeight;
-        updateCropBox();
-    }
-}
+        function updateCropBox() {
+            if (!cropBox) return;
+            cropBox.style.left = cropBoxX + 'px';
+            cropBox.style.top = cropBoxY + 'px';
+            cropBox.style.width = cropBoxWidth + 'px';
+            cropBox.style.height = cropBoxHeight + 'px';
+        }
 
-// ===== RECALCULAR CROP BOX AL CAMBIAR TAMAÑO / ORIENTACIÓN =====
-function recalcCropBox() {
-    if (!cropTemplate || !cropBox) return;
-    const imgW = imageToCrop.width;
-    const imgH = imageToCrop.height;
-    if (imgW === 0 || imgH === 0) return;
-    cropBoxX = cropTemplate.x * imgW;
-    cropBoxY = cropTemplate.y * imgH;
-    cropBoxWidth = cropTemplate.width * imgW;
-    cropBoxHeight = cropTemplate.height * imgH;
-    updateCropBox();
-}
+        function startResize(e) {
+            const rect = cropContainer.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+            isResizing = true;
+            resizeDirection = e.target.classList.contains('resize-nw') ? 'nw' :
+                             e.target.classList.contains('resize-ne') ? 'ne' :
+                             e.target.classList.contains('resize-sw') ? 'sw' : 'se';
+            e.preventDefault();
+        }
 
-// Listeners para recalcular
-window.addEventListener('resize', recalcCropBox);
-window.addEventListener('orientationchange', function() {
-    setTimeout(recalcCropBox, 300);
-});
+        function startDrag(e) {
+            const rect = cropContainer.getBoundingClientRect();
+            startX = e.clientX - rect.left - cropBoxX;
+            startY = e.clientY - rect.top - cropBoxY;
+            isDragging = true;
+            e.preventDefault();
+        }
+
+        function handleMove(e) {
+            if (!isDragging && !isResizing) return;
+            const rect = cropContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            applyMove(x, y);
+        }
+
+        function stopInteraction() {
+            isDragging = false;
+            isResizing = false;
+            resizeDirection = null;
+        }
+
+        function startResizeTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = cropContainer.getBoundingClientRect();
+            startX = touch.clientX - rect.left;
+            startY = touch.clientY - rect.top;
+            isResizing = true;
+            resizeDirection = e.target.classList.contains('resize-nw') ? 'nw' :
+                             e.target.classList.contains('resize-ne') ? 'ne' :
+                             e.target.classList.contains('resize-sw') ? 'sw' : 'se';
+        }
+
+        function startDragTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = cropContainer.getBoundingClientRect();
+            startX = touch.clientX - rect.left - cropBoxX;
+            startY = touch.clientY - rect.top - cropBoxY;
+            isDragging = true;
+        }
+
+        function handleMoveTouch(e) {
+            e.preventDefault();
+            if (!isDragging && !isResizing) return;
+            const touch = e.touches[0];
+            const rect = cropContainer.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            applyMove(x, y);
+        }
+
+        function stopInteractionTouch(e) {
+            isDragging = false;
+            isResizing = false;
+            resizeDirection = null;
+        }
+
+        function applyMove(x, y) {
+            if (isDragging) {
+                let newX = x - startX;
+                let newY = y - startY;
+                newX = Math.max(0, Math.min(newX, imageToCrop.width - cropBoxWidth));
+                newY = Math.max(0, Math.min(newY, imageToCrop.height - cropBoxHeight));
+                cropBoxX = newX;
+                cropBoxY = newY;
+                updateCropBox();
+            } else if (isResizing) {
+                let newWidth = cropBoxWidth;
+                let newHeight = cropBoxHeight;
+                let newX = cropBoxX;
+                let newY = cropBoxY;
+
+                switch (resizeDirection) {
+                    case 'se':
+                        newWidth = x - cropBoxX;
+                        newHeight = y - cropBoxY;
+                        break;
+                    case 'ne':
+                        newWidth = x - cropBoxX;
+                        newHeight = cropBoxY + cropBoxHeight - y;
+                        newY = y;
+                        break;
+                    case 'sw':
+                        newWidth = cropBoxX + cropBoxWidth - x;
+                        newHeight = y - cropBoxY;
+                        newX = x;
+                        break;
+                    case 'nw':
+                        newWidth = cropBoxX + cropBoxWidth - x;
+                        newHeight = cropBoxY + cropBoxHeight - y;
+                        newX = x;
+                        newY = y;
+                        break;
+                }
+
+                const minSize = 20;
+                newWidth = Math.max(minSize, Math.min(newWidth, imageToCrop.width - newX));
+                newHeight = Math.max(minSize, Math.min(newHeight, imageToCrop.height - newY));
+                cropBoxX = newX;
+                cropBoxY = newY;
+                cropBoxWidth = newWidth;
+                cropBoxHeight = newHeight;
+                updateCropBox();
+            }
+        }
+
+        function recalcCropBox() {
+            if (!cropTemplate || !cropBox) return;
+            const imgW = imageToCrop.width;
+            const imgH = imageToCrop.height;
+            if (imgW === 0 || imgH === 0) return;
+            cropBoxX = cropTemplate.x * imgW;
+            cropBoxY = cropTemplate.y * imgH;
+            cropBoxWidth = cropTemplate.width * imgW;
+            cropBoxHeight = cropTemplate.height * imgH;
+            updateCropBox();
+        }
+
+        window.addEventListener('resize', recalcCropBox);
+        window.addEventListener('orientationchange', function() {
+            setTimeout(recalcCropBox, 300);
+        });
+
         // ===== RECORTAR IMAGEN =====
         function cropImage() {
             if (!originalImage || !cropBox) return null;
