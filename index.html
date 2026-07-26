@@ -843,6 +843,90 @@
                 updateCropBox();
             }
 
+            // ===== FUNCIONES TÁCTILES (añadir después de las de ratón) =====
+function startResizeTouch(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = cropContainer.getBoundingClientRect();
+    startX = touch.clientX - rect.left;
+    startY = touch.clientY - rect.top;
+    isResizing = true;
+    resizeDirection = e.target.classList.contains('resize-nw') ? 'nw' :
+                     e.target.classList.contains('resize-ne') ? 'ne' :
+                     e.target.classList.contains('resize-sw') ? 'sw' : 'se';
+}
+
+function startDragTouch(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const rect = cropContainer.getBoundingClientRect();
+    startX = touch.clientX - rect.left - cropBoxX;
+    startY = touch.clientY - rect.top - cropBoxY;
+    isDragging = true;
+}
+
+function handleMoveTouch(e) {
+    e.preventDefault();
+    if (!isDragging && !isResizing) return;
+    const touch = e.touches[0];
+    const rect = cropContainer.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    if (isDragging) {
+        let newX = x - startX;
+        let newY = y - startY;
+        // Limitar dentro del contenedor
+        newX = Math.max(0, Math.min(newX, imageToCrop.width - cropBoxWidth));
+        newY = Math.max(0, Math.min(newY, imageToCrop.height - cropBoxHeight));
+        cropBoxX = newX;
+        cropBoxY = newY;
+        updateCropBox();
+    } else if (isResizing) {
+        let newWidth = cropBoxWidth;
+        let newHeight = cropBoxHeight;
+        let newX = cropBoxX;
+        let newY = cropBoxY;
+
+        switch (resizeDirection) {
+            case 'se':
+                newWidth = x - cropBoxX;
+                newHeight = y - cropBoxY;
+                break;
+            case 'ne':
+                newWidth = x - cropBoxX;
+                newHeight = cropBoxY + cropBoxHeight - y;
+                newY = y;
+                break;
+            case 'sw':
+                newWidth = cropBoxX + cropBoxWidth - x;
+                newHeight = y - cropBoxY;
+                newX = x;
+                break;
+            case 'nw':
+                newWidth = cropBoxX + cropBoxWidth - x;
+                newHeight = cropBoxY + cropBoxHeight - y;
+                newX = x;
+                newY = y;
+                break;
+        }
+
+        // Tamaño mínimo y límites
+        const minSize = 20;
+        newWidth = Math.max(minSize, Math.min(newWidth, imageToCrop.width - newX));
+        newHeight = Math.max(minSize, Math.min(newHeight, imageToCrop.height - newY));
+        cropBoxX = newX;
+        cropBoxY = newY;
+        cropBoxWidth = newWidth;
+        cropBoxHeight = newHeight;
+        updateCropBox();
+    }
+function stopInteractionTouch(e) {
+    // Algunos navegadores envían touchcancel, también se detiene
+    isDragging = false;
+    isResizing = false;
+    resizeDirection = null;
+}
             // Eliminar listeners anteriores para evitar duplicados
             const handles = cropBox.querySelectorAll('.resize-handle');
             handles.forEach(handle => {
