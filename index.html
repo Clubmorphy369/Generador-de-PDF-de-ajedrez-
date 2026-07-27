@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ... (el CSS se mantiene igual, solo añadir al final) */
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -161,7 +162,8 @@
             border: 1px solid #ddd;
             border-radius: var(--border-radius);
             background: #f9f9f9;
-            touch-action: pan-x pan-y pinch-zoom;
+            /* Cambiamos a none para evitar que el navegador capture gestos de zoom/pan */
+            touch-action: none;
         }
 
         #imageToCrop {
@@ -422,6 +424,7 @@
     </style>
 </head>
 <body>
+    <!-- El HTML permanece igual -->
     <div class="app-container">
         <header class="app-header">
             <h1><i class="fas fa-chess-board"></i> ChessExtract Pro</h1>
@@ -580,6 +583,10 @@
         let cropTemplate = null;
         let templateAppliedToAll = false;
 
+        // Variables para controlar listeners
+        let cropListenersAttached = false;
+        let globalListenersAttached = false;
+
         const imageInput = document.getElementById('imageInput');
         const loadImageBtn = document.getElementById('loadImageBtn');
         const cropSection = document.getElementById('cropSection');
@@ -609,63 +616,25 @@
         const processAllBtn = document.getElementById('processAllBtn');
         const clearAllBtn = document.getElementById('clearAllBtn');
 
-        function initCropBox() {
-            cropBox = document.querySelector('.crop-box');
-            if (!cropBox) return;
-
-            if (cropTemplate && templateAppliedToAll) {
-                applyCropTemplate();
-            } else if (!cropTemplate) {
-                const imgWidth = imageToCrop.width;
-                const imgHeight = imageToCrop.height;
-                cropBoxX = imgWidth * 0.25;
-                cropBoxY = imgHeight * 0.25;
-                cropBoxWidth = imgWidth * 0.5;
-                cropBoxHeight = imgHeight * 0.5;
-                updateCropBox();
-            }
-
-            const handles = cropBox.querySelectorAll('.resize-handle');
-            handles.forEach(handle => {
-                handle.addEventListener('mousedown', startResize);
-                handle.addEventListener('touchstart', startResizeTouch, { passive: false });
-            });
-
-            cropBox.addEventListener('mousedown', startDrag);
-            cropBox.addEventListener('touchstart', startDragTouch, { passive: false });
-
-            document.addEventListener('mousemove', handleMove);
-            document.addEventListener('mouseup', stopInteraction);
-            document.addEventListener('touchmove', handleMoveTouch, { passive: false });
-            document.addEventListener('touchend', stopInteractionTouch);
-
-            cropBox.classList.remove('hidden');
-            cropBtn.disabled = false;
-            updateTemplateButtons();
-        }
-
-        function updateCropBox() {
-            if (!cropBox) return;
-            cropBox.style.left = `${cropBoxX}px`;
-            cropBox.style.top = `${cropBoxY}px`;
-            cropBox.style.width = `${cropBoxWidth}px`;
-            cropBox.style.height = `${cropBoxHeight}px`;
-        }
-
-        function startDrag(e) {
+        // --- Funciones auxiliares de eventos ---
+        function onDragStart(e) {
             if (e.target.classList.contains('resize-handle')) return;
             isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            startX = clientX;
+            startY = clientY;
             cropBoxX = parseInt(cropBox.style.left);
             cropBoxY = parseInt(cropBox.style.top);
             e.preventDefault();
         }
 
-        function startResize(e) {
+        function onResizeStart(e) {
             isResizing = true;
-            startX = e.clientX;
-            startY = e.clientY;
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            startX = clientX;
+            startY = clientY;
             cropBoxX = parseInt(cropBox.style.left);
             cropBoxY = parseInt(cropBox.style.top);
             cropBoxWidth = parseInt(cropBox.style.width);
@@ -674,48 +643,22 @@
             e.preventDefault();
         }
 
-        function startDragTouch(e) {
-            if (e.target.classList.contains('resize-handle')) return;
-            const touch = e.touches[0];
-            isDragging = true;
-            startX = touch.clientX;
-            startY = touch.clientY;
-            cropBoxX = parseInt(cropBox.style.left);
-            cropBoxY = parseInt(cropBox.style.top);
-            e.preventDefault();
-        }
-
-        function startResizeTouch(e) {
-            const touch = e.touches[0];
-            isResizing = true;
-            startX = touch.clientX;
-            startY = touch.clientY;
-            cropBoxX = parseInt(cropBox.style.left);
-            cropBoxY = parseInt(cropBox.style.top);
-            cropBoxWidth = parseInt(cropBox.style.width);
-            cropBoxHeight = parseInt(cropBox.style.height);
-            resizeDirection = e.target.classList[1];
-            e.preventDefault();
-        }
-
-        function handleMove(e) {
+        function onMove(e) {
             if (!isDragging && !isResizing) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            const dx = clientX - startX;
+            const dy = clientY - startY;
             performMove(dx, dy);
-            startX = e.clientX;
-            startY = e.clientY;
+            startX = clientX;
+            startY = clientY;
+            if (e.type === 'touchmove') e.preventDefault();
         }
 
-        function handleMoveTouch(e) {
-            if (!isDragging && !isResizing) return;
-            const touch = e.touches[0];
-            const dx = touch.clientX - startX;
-            const dy = touch.clientY - startY;
-            performMove(dx, dy);
-            startX = touch.clientX;
-            startY = touch.clientY;
-            e.preventDefault();
+        function onEnd(e) {
+            isDragging = false;
+            isResizing = false;
+            if (e.type === 'touchend') e.preventDefault();
         }
 
         function performMove(dx, dy) {
@@ -747,17 +690,87 @@
             updateCropBox();
         }
 
-        function stopInteraction() {
-            isDragging = false;
-            isResizing = false;
+        function updateCropBox() {
+            if (!cropBox) return;
+            cropBox.style.left = `${cropBoxX}px`;
+            cropBox.style.top = `${cropBoxY}px`;
+            cropBox.style.width = `${cropBoxWidth}px`;
+            cropBox.style.height = `${cropBoxHeight}px`;
         }
 
-        function stopInteractionTouch(e) {
-            isDragging = false;
-            isResizing = false;
-            e.preventDefault();
+        // --- Inicialización de eventos del crop box ---
+        function attachCropBoxEvents() {
+            if (!cropBox) return;
+            // Si ya hay listeners, los removemos antes de agregar nuevos
+            detachCropBoxEvents();
+
+            const handles = cropBox.querySelectorAll('.resize-handle');
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', onResizeStart);
+                handle.addEventListener('touchstart', onResizeStart, { passive: false });
+            });
+
+            cropBox.addEventListener('mousedown', onDragStart);
+            cropBox.addEventListener('touchstart', onDragStart, { passive: false });
+
+            cropListenersAttached = true;
         }
 
+        function detachCropBoxEvents() {
+            if (!cropBox || !cropListenersAttached) return;
+            const handles = cropBox.querySelectorAll('.resize-handle');
+            handles.forEach(handle => {
+                handle.removeEventListener('mousedown', onResizeStart);
+                handle.removeEventListener('touchstart', onResizeStart);
+            });
+            cropBox.removeEventListener('mousedown', onDragStart);
+            cropBox.removeEventListener('touchstart', onDragStart);
+            cropListenersAttached = false;
+        }
+
+        // --- Eventos globales (una sola vez) ---
+        function attachGlobalEvents() {
+            if (globalListenersAttached) return;
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onEnd);
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('touchend', onEnd, { passive: false });
+            globalListenersAttached = true;
+        }
+
+        // --- Inicialización del crop box ---
+        function initCropBox() {
+            cropBox = document.querySelector('.crop-box');
+            if (!cropBox) return;
+
+            // Si no hay plantilla o no se ha aplicado a todas, calcular recuadro inicial
+            if (cropTemplate && templateAppliedToAll) {
+                applyCropTemplate();
+            } else if (!cropTemplate) {
+                const imgWidth = imageToCrop.width;
+                const imgHeight = imageToCrop.height;
+                cropBoxX = imgWidth * 0.25;
+                cropBoxY = imgHeight * 0.25;
+                cropBoxWidth = imgWidth * 0.5;
+                cropBoxHeight = imgHeight * 0.5;
+                updateCropBox();
+            }
+
+            // Siempre mostrar y habilitar
+            cropBox.classList.remove('hidden');
+            cropBtn.disabled = false;
+            attachCropBoxEvents();
+            updateTemplateButtons();
+        }
+
+        // --- Limpieza al cambiar de imagen ---
+        function cleanupCropBox() {
+            detachCropBoxEvents();
+            if (cropBox) cropBox.classList.add('hidden');
+            cropBtn.disabled = true;
+        }
+
+        // --- Funciones de recorte y guardado (sin cambios) ---
         function cropImage() {
             if (!originalImage || !cropBox) return null;
             const canvasWidth = cropBoxWidth * resolutionFactor;
@@ -810,6 +823,7 @@
             imageFiles = [];
             currentImageIndex = 0;
             templateAppliedToAll = false;
+            cleanupCropBox();
         }
 
         function startEdit(index) {
@@ -818,7 +832,21 @@
             originalImage.onload = function() {
                 imageToCrop.src = savedChessboards[index];
                 cropSection.classList.remove('hidden');
-                setTimeout(initCropBox, 100);
+                // Esperar a que la imagen se cargue en el DOM
+                setTimeout(() => {
+                    // Forzar dimensiones del crop box
+                    cropBox = document.querySelector('.crop-box');
+                    if (cropBox) {
+                        const imgWidth = imageToCrop.width;
+                        const imgHeight = imageToCrop.height;
+                        cropBoxX = 0;
+                        cropBoxY = 0;
+                        cropBoxWidth = imgWidth;
+                        cropBoxHeight = imgHeight;
+                        updateCropBox();
+                        initCropBox();
+                    }
+                }, 100);
             };
             originalImage.src = savedChessboards[index];
         }
@@ -977,14 +1005,20 @@
             showNotification("PDF generado y descargado");
         }
 
+        // --- Carga de imágenes ---
         function loadCurrentImage() {
             if (imageFiles.length === 0) return;
+            cleanupCropBox(); // Limpiar eventos anteriores
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 originalImage = new Image();
                 originalImage.onload = function() {
                     imageToCrop.src = e.target.result;
-                    setTimeout(initCropBox, 100);
+                    // Esperar a que el navegador renderice la imagen
+                    setTimeout(() => {
+                        initCropBox();
+                    }, 150);
                 };
                 originalImage.src = e.target.result;
             };
@@ -1002,6 +1036,7 @@
             if (currentImageIndex < imageFiles.length - 1) { currentImageIndex++; loadCurrentImage(); }
         }
 
+        // --- Plantillas ---
         function saveCropTemplate() {
             if (!cropBox) return;
             const imgWidth = imageToCrop.width;
@@ -1028,12 +1063,11 @@
             showNotification("Plantilla aplicada a esta imagen");
         }
 
-        // ─── CORRECCIÓN PRINCIPAL: auto‑guardar plantilla si no existe ───
         function applyTemplateToAll() {
             if (!cropTemplate) {
-                saveCropTemplate();                // guarda la proporción actual automáticamente
+                saveCropTemplate();
             }
-            if (!cropTemplate) return;             // no se pudo guardar (p.ej. sin imagen)
+            if (!cropTemplate) return;
             templateAppliedToAll = true;
             applyCropTemplate();
             showNotification("Plantilla aplicada a todas las imágenes");
@@ -1043,7 +1077,7 @@
         function processAllImages() {
             if (imageFiles.length === 0) return;
             if (!cropTemplate) {
-                saveCropTemplate();                // guarda la proporción actual automáticamente
+                saveCropTemplate();
             }
             if (cropTemplate) templateAppliedToAll = true;
 
@@ -1080,7 +1114,7 @@
             }
         }
 
-        // Event Listeners
+        // --- Event Listeners de los botones (sin cambios) ---
         imageInput.addEventListener('change', function() {
             loadImageBtn.disabled = !this.files || this.files.length === 0;
             if (this.files && this.files.length > 0) {
@@ -1123,6 +1157,9 @@
 
         headerInput.addEventListener('input', updatePdfPreview);
         footerInput.addEventListener('input', updatePdfPreview);
+
+        // --- Inicialización global ---
+        attachGlobalEvents();
     </script>
 </body>
 </html>
