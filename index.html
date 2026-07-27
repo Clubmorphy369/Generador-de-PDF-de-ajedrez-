@@ -504,7 +504,7 @@
             
             <div class="auto-process-section">
                 <h3><i class="fas fa-cogs"></i> Procesamiento automático</h3>
-                <p>Si todas tus imágenes tienen el mismo formato, puedes procesarlas automáticamente usando la plantilla guardada.</p>
+                <p>Procesa todas las imágenes usando el recorte actual (no necesitas guardar plantilla manualmente).</p>
                 <div class="template-buttons">
                     <button id="processAllBtn" class="btn btn-success">
                         <i class="fas fa-bolt"></i> Procesar todas las imágenes
@@ -563,7 +563,7 @@
     </div>
 
     <script>
-        // Variables globales (misma lógica que tu versión funcional)
+        // Variables globales
         let originalImage = null;
         let cropBox = null;
         let isDragging = false;
@@ -580,7 +580,6 @@
         let cropTemplate = null;
         let templateAppliedToAll = false;
 
-        // Elementos DOM
         const imageInput = document.getElementById('imageInput');
         const loadImageBtn = document.getElementById('loadImageBtn');
         const cropSection = document.getElementById('cropSection');
@@ -610,7 +609,6 @@
         const processAllBtn = document.getElementById('processAllBtn');
         const clearAllBtn = document.getElementById('clearAllBtn');
 
-        // Inicializar el recuadro de selección
         function initCropBox() {
             cropBox = document.querySelector('.crop-box');
             if (!cropBox) return;
@@ -654,7 +652,6 @@
             cropBox.style.height = `${cropBoxHeight}px`;
         }
 
-        // Eventos de ratón
         function startDrag(e) {
             if (e.target.classList.contains('resize-handle')) return;
             isDragging = true;
@@ -677,7 +674,6 @@
             e.preventDefault();
         }
 
-        // Eventos táctiles
         function startDragTouch(e) {
             if (e.target.classList.contains('resize-handle')) return;
             const touch = e.touches[0];
@@ -702,7 +698,6 @@
             e.preventDefault();
         }
 
-        // Movimiento unificado
         function handleMove(e) {
             if (!isDragging && !isResizing) return;
             const dx = e.clientX - startX;
@@ -763,7 +758,6 @@
             e.preventDefault();
         }
 
-        // Recortar imagen
         function cropImage() {
             if (!originalImage || !cropBox) return null;
             const canvasWidth = cropBoxWidth * resolutionFactor;
@@ -784,7 +778,6 @@
             return canvas.toDataURL('image/jpeg', imageQuality);
         }
 
-        // Notificación mejorada (centrada)
         function showNotification(message, isError = false) {
             notificationText.textContent = message;
             notification.querySelector('i').className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
@@ -793,7 +786,6 @@
             setTimeout(() => notification.classList.remove('show'), 3000);
         }
 
-        // Agregar tablero
         function addChessboard(dataUrl) {
             if (editingIndex >= 0) {
                 savedChessboards[editingIndex] = dataUrl;
@@ -853,7 +845,6 @@
                 chessboardsContainer.appendChild(item);
             });
 
-            // Delegación de eventos para botones dinámicos
             chessboardsContainer.querySelectorAll('.remove-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const idx = parseInt(this.dataset.index);
@@ -1037,15 +1028,23 @@
             showNotification("Plantilla aplicada a esta imagen");
         }
 
+        // ─── CORRECCIÓN PRINCIPAL: auto‑guardar plantilla si no existe ───
         function applyTemplateToAll() {
-            if (!cropTemplate) return;
+            if (!cropTemplate) {
+                saveCropTemplate();                // guarda la proporción actual automáticamente
+            }
+            if (!cropTemplate) return;             // no se pudo guardar (p.ej. sin imagen)
             templateAppliedToAll = true;
             applyCropTemplate();
             showNotification("Plantilla aplicada a todas las imágenes");
+            updateTemplateButtons();
         }
 
         function processAllImages() {
             if (imageFiles.length === 0) return;
+            if (!cropTemplate) {
+                saveCropTemplate();                // guarda la proporción actual automáticamente
+            }
             if (cropTemplate) templateAppliedToAll = true;
 
             const processNextImage = (index) => {
@@ -1081,7 +1080,7 @@
             }
         }
 
-        // Event Listeners (sin cambios respecto a tu versión funcional)
+        // Event Listeners
         imageInput.addEventListener('change', function() {
             loadImageBtn.disabled = !this.files || this.files.length === 0;
             if (this.files && this.files.length > 0) {
