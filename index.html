@@ -728,7 +728,7 @@
                 libError.classList.remove('hidden');
             }
 
-            // ===== FUNCIONES DEL CROP BOX =====
+            // ===== FUNCIONES AUXILIARES DEL CROP BOX =====
             function getImageDisplayDimensions() {
                 const displayedW = imageToCrop.width || imageToCrop.naturalWidth || 400;
                 const displayedH = imageToCrop.height || imageToCrop.naturalHeight || 300;
@@ -743,24 +743,29 @@
                 cropBoxHeight = h * 0.5;
             }
 
+            function getCurrentCropProportions() {
+                const { w, h } = getImageDisplayDimensions();
+                if (w === 0 || h === 0) return null;
+                return {
+                    x: cropBoxX / w,
+                    y: cropBoxY / h,
+                    width: cropBoxWidth / w,
+                    height: cropBoxHeight / h
+                };
+            }
+
             function initCropBox() {
                 cropBox = document.querySelector('.crop-box');
                 if (!cropBox) return;
 
                 const { w, h } = getImageDisplayDimensions();
-                if (cropTemplate && templateAppliedToAll) {
+                if (cropTemplate) {
                     cropBoxX = cropTemplate.x * w;
                     cropBoxY = cropTemplate.y * h;
                     cropBoxWidth = cropTemplate.width * w;
                     cropBoxHeight = cropTemplate.height * h;
-                } else if (!cropTemplate) {
-                    setDefaultCropBox();
                 } else {
-                    // Hay plantilla pero no aplicada a todas: aplicar a esta imagen
-                    cropBoxX = cropTemplate.x * w;
-                    cropBoxY = cropTemplate.y * h;
-                    cropBoxWidth = cropTemplate.width * w;
-                    cropBoxHeight = cropTemplate.height * h;
+                    setDefaultCropBox();
                 }
                 updateCropBox();
 
@@ -919,7 +924,6 @@
                 canvas.height = canvasHeight;
                 const ctx = canvas.getContext('2d');
 
-                // Calcular escala: naturalWidth / displayedWidth
                 const displayedW = imageToCrop.width || imageToCrop.naturalWidth;
                 const displayedH = imageToCrop.height || imageToCrop.naturalHeight;
                 const scaleX = imageToCrop.naturalWidth / displayedW;
@@ -981,7 +985,9 @@
                 originalImage.onload = function() {
                     imageToCrop.src = savedChessboards[index];
                     cropSection.classList.remove('hidden');
-                    setTimeout(initCropBox, 100);
+                    requestAnimationFrame(() => {
+                        initCropBox();
+                    });
                 };
                 originalImage.src = savedChessboards[index];
             }
@@ -1184,7 +1190,9 @@
                     originalImage = new Image();
                     originalImage.onload = function() {
                         imageToCrop.src = e.target.result;
-                        setTimeout(initCropBox, 100);
+                        requestAnimationFrame(() => {
+                            initCropBox();
+                        });
                     };
                     originalImage.src = e.target.result;
                 };
@@ -1205,36 +1213,46 @@
                 if (currentImageIndex < imageFiles.length - 1) { currentImageIndex++; loadCurrentImage(); }
             }
 
-            // ===== PLANTILLAS =====
+            // ===== PLANTILLAS (CORREGIDO) =====
             function saveCropTemplate() {
-                if (!cropBox) return;
-                const { w, h } = getImageDisplayDimensions();
-                cropTemplate = {
-                    x: cropBoxX / w,
-                    y: cropBoxY / h,
-                    width: cropBoxWidth / w,
-                    height: cropBoxHeight / h
-                };
-                showNotification('Plantilla guardada');
+                const proportions = getCurrentCropProportions();
+                if (!proportions) {
+                    showNotification('❌ No se pudo guardar la plantilla. Carga una imagen primero.', true);
+                    return;
+                }
+                cropTemplate = proportions;
+                showNotification('✅ Plantilla guardada');
                 updateTemplateButtons();
             }
 
             function applyCropTemplate() {
-                if (!cropTemplate) return;
+                const proportions = cropTemplate || getCurrentCropProportions();
+                if (!proportions) {
+                    showNotification('❌ Ajusta el recuadro primero.', true);
+                    return;
+                }
                 const { w, h } = getImageDisplayDimensions();
-                cropBoxX = cropTemplate.x * w;
-                cropBoxY = cropTemplate.y * h;
-                cropBoxWidth = cropTemplate.width * w;
-                cropBoxHeight = cropTemplate.height * h;
+                cropBoxX = proportions.x * w;
+                cropBoxY = proportions.y * h;
+                cropBoxWidth = proportions.width * w;
+                cropBoxHeight = proportions.height * h;
                 updateCropBox();
-                showNotification('Plantilla aplicada a esta imagen');
+                showNotification('✅ Plantilla aplicada a esta imagen');
             }
 
             function applyTemplateToAll() {
-                if (!cropTemplate) return;
+                if (!cropTemplate) {
+                    const proportions = getCurrentCropProportions();
+                    if (!proportions) {
+                        showNotification('❌ Ajusta el recuadro antes de aplicar a todas.', true);
+                        return;
+                    }
+                    cropTemplate = proportions;
+                }
                 templateAppliedToAll = true;
                 applyCropTemplate();
-                showNotification('Plantilla aplicada a todas las imágenes');
+                showNotification('✅ Plantilla aplicada a todas las imágenes');
+                updateTemplateButtons();
             }
 
             function updateTemplateButtons() {
@@ -1242,10 +1260,21 @@
                 applyToAllBtn.disabled = !cropTemplate;
             }
 
-            // ===== PROCESAR TODAS (ASÍNCRONO SEGURO) =====
+            // ===== PROCESAR TODAS (RECUERDA EL RECORTE ACTUAL) =====
             function processAllImages() {
                 if (imageFiles.length === 0 || isProcessing) return;
-                if (cropTemplate) templateAppliedToAll = true;
+                
+                // Si no hay plantilla guardada, capturar la proporción del recorte actual
+                if (!cropTemplate) {
+                    const proportions = getCurrentCropProportions();
+                    if (!proportions) {
+                        showNotification('❌ Ajusta el recuadro antes de procesar todas las imágenes.', true);
+                        return;
+                    }
+                    cropTemplate = proportions;
+                }
+                templateAppliedToAll = true;
+                
                 isProcessing = true;
                 const originalText = processAllBtn.innerHTML;
                 processAllBtn.disabled = true;
@@ -1254,7 +1283,7 @@
                 let index = 0;
                 function processNext() {
                     if (index >= imageFiles.length) {
-                        showNotification('Todas las imágenes procesadas');
+                        showNotification('✅ Todas las imágenes procesadas');
                         isProcessing = false;
                         processAllBtn.disabled = false;
                         processAllBtn.innerHTML = originalText;
@@ -1267,10 +1296,10 @@
                         originalImage = new Image();
                         originalImage.onload = function() {
                             imageToCrop.src = e.target.result;
-                            // Asegurar que el crop box se inicializa con plantilla si existe
+                            // Aplicar la plantilla (proporción) a esta imagen
                             setTimeout(() => {
-                                if (cropTemplate) {
-                                    const { w, h } = getImageDisplayDimensions();
+                                const { w, h } = getImageDisplayDimensions();
+                                if (cropTemplate && w > 0 && h > 0) {
                                     cropBoxX = cropTemplate.x * w;
                                     cropBoxY = cropTemplate.y * h;
                                     cropBoxWidth = cropTemplate.width * w;
@@ -1281,6 +1310,8 @@
                                 if (data) {
                                     savedChessboards.push(data);
                                     updateChessboardsDisplay();
+                                } else {
+                                    showNotification('⚠️ No se pudo recortar la imagen ' + (index+1), true);
                                 }
                                 index++;
                                 processNext();
@@ -1326,7 +1357,6 @@
                 }
             });
 
-            // Recuperación si el evento change no disparó (ej. mismo archivo)
             imageInput.addEventListener('click', function() {
                 setTimeout(() => {
                     if (this.files && this.files.length > 0 && imageFiles.length === 0) {
@@ -1351,7 +1381,6 @@
                 }
                 cropSection.classList.remove('hidden');
                 loadCurrentImage();
-                // Limpiar input para permitir re-selección del mismo archivo
                 imageInput.value = '';
                 updateDiagnostic();
             });
