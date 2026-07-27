@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" onerror="window.__html2canvasFallo=true;"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== VARIABLES ===== */
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -24,12 +23,7 @@
             --touch-min-size: 44px;
         }
 
-        /* ===== RESET ===== */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -49,14 +43,12 @@
             box-shadow: var(--box-shadow);
         }
 
-        /* ===== HEADER ===== */
         .app-header {
             text-align: center;
             margin-bottom: clamp(20px, 4vw, 40px);
             padding-bottom: clamp(15px, 2vw, 25px);
             border-bottom: 1px solid var(--light);
         }
-
         .app-header h1 {
             color: var(--primary);
             font-size: clamp(1.8rem, 5vw, 3rem);
@@ -66,7 +58,6 @@
             justify-content: center;
             gap: 10px 15px;
         }
-
         .app-header p {
             color: var(--gray);
             font-size: clamp(0.95rem, 1.5vw, 1.2rem);
@@ -74,7 +65,6 @@
             margin: 0 auto;
         }
 
-        /* ===== CARDS ===== */
         .card {
             margin-bottom: clamp(20px, 3vw, 30px);
             padding: clamp(15px, 2.5vw, 30px);
@@ -84,7 +74,6 @@
             border-left: 4px solid var(--secondary);
             transition: var(--transition);
         }
-
         @media (hover: hover) {
             .card:hover {
                 transform: translateY(-3px);
@@ -100,18 +89,9 @@
             color: var(--primary);
             flex-wrap: wrap;
         }
+        .card-header i { font-size: clamp(1.3rem, 2vw, 1.8rem); color: var(--secondary); }
+        .card-header h2 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); font-weight: 600; }
 
-        .card-header i {
-            font-size: clamp(1.3rem, 2vw, 1.8rem);
-            color: var(--secondary);
-        }
-
-        .card-header h2 {
-            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-            font-weight: 600;
-        }
-
-        /* ===== INSTRUCCIONES ===== */
         .instructions {
             background-color: #e7f5ff;
             padding: clamp(15px, 2vw, 25px);
@@ -119,16 +99,9 @@
             margin-bottom: 25px;
             border-left: 4px solid var(--secondary);
         }
+        .instructions ol { padding-left: clamp(18px, 2vw, 30px); margin-top: 10px; }
+        .instructions li { margin-bottom: 6px; }
 
-        .instructions ol {
-            padding-left: clamp(18px, 2vw, 30px);
-            margin-top: 10px;
-        }
-        .instructions li {
-            margin-bottom: 6px;
-        }
-
-        /* ===== BOTONES ===== */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -150,8 +123,8 @@
             line-height: 1.2;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
-
         @media (hover: hover) {
             .btn:hover {
                 background-color: var(--primary);
@@ -159,7 +132,6 @@
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             }
         }
-
         .btn:disabled {
             background-color: var(--gray);
             cursor: not-allowed;
@@ -167,11 +139,9 @@
             box-shadow: none !important;
             opacity: 0.6;
         }
-
         .btn-danger { background-color: var(--accent); }
         .btn-warning { background-color: var(--warning); }
         .btn-success { background-color: var(--success); }
-
         .btn-outline {
             background-color: transparent;
             border: 2px solid var(--secondary);
@@ -183,14 +153,8 @@
                 color: white;
             }
         }
+        .btn-sm { padding: 8px 14px; font-size: 0.9rem; min-height: 36px; }
 
-        .btn-sm {
-            padding: 8px 14px;
-            font-size: 0.9rem;
-            min-height: 36px;
-        }
-
-        /* ===== CONTROLES ===== */
         .form-control {
             width: 100%;
             padding: 12px 15px;
@@ -215,7 +179,6 @@
             color: var(--dark);
         }
 
-        /* ===== DIAGNÓSTICO MEJORADO ===== */
         #diagnostic {
             background: #f8f9fa;
             border: 1px solid #ddd;
@@ -228,14 +191,10 @@
             white-space: pre-wrap;
             word-break: break-all;
         }
-        #diagnostic strong {
-            color: var(--primary);
-        }
         .diag-ok { color: #155724; background: #d4edda; padding: 2px 8px; border-radius: 4px; }
         .diag-error { color: #721c24; background: #f8d7da; padding: 2px 8px; border-radius: 4px; }
         .diag-warning { color: #856404; background: #fff3cd; padding: 2px 8px; border-radius: 4px; }
 
-        /* ===== CROP CONTAINER ===== */
         #cropContainer {
             position: relative;
             overflow: hidden;
@@ -244,8 +203,9 @@
             border: 1px solid #ddd;
             border-radius: var(--border-radius);
             background: #f9f9f9;
-            touch-action: none;
+            touch-action: pan-x pan-y pinch-zoom;
             overscroll-behavior: contain;
+            cursor: grab;
         }
 
         #imageToCrop {
@@ -256,6 +216,7 @@
             user-select: none;
             -webkit-user-drag: none;
             -webkit-touch-callout: none;
+            pointer-events: none;
         }
 
         .crop-box {
@@ -281,24 +242,18 @@
             touch-action: none;
             -webkit-touch-callout: none;
         }
-
         @media (pointer: coarse) {
-            .resize-handle {
-                width: 28px;
-                height: 28px;
-            }
-            .resize-nw { top: -14px; left: -14px; }
-            .resize-ne { top: -14px; right: -14px; }
-            .resize-sw { bottom: -14px; left: -14px; }
-            .resize-se { bottom: -14px; right: -14px; }
+            .resize-handle { width: 32px; height: 32px; }
+            .resize-nw { top: -16px; left: -16px; }
+            .resize-ne { top: -16px; right: -16px; }
+            .resize-sw { bottom: -16px; left: -16px; }
+            .resize-se { bottom: -16px; right: -16px; }
         }
-
         .resize-nw { top: -10px; left: -10px; cursor: nw-resize; }
         .resize-ne { top: -10px; right: -10px; cursor: ne-resize; }
         .resize-sw { bottom: -10px; left: -10px; cursor: sw-resize; }
         .resize-se { bottom: -10px; right: -10px; cursor: se-resize; }
 
-        /* ===== IMAGE COUNTER ===== */
         .image-counter {
             text-align: center;
             margin: 15px 0;
@@ -308,7 +263,6 @@
             border-radius: var(--border-radius);
         }
 
-        /* ===== QUALITY CONTROLS ===== */
         .quality-control {
             display: flex;
             flex-wrap: wrap;
@@ -319,21 +273,14 @@
             background-color: #f8f9fa;
             border-radius: var(--border-radius);
         }
-
         .quality-slider {
             flex: 1;
             min-width: 120px;
             min-height: var(--touch-min-size);
             touch-action: manipulation;
         }
+        .quality-value { min-width: 40px; text-align: center; font-weight: 500; }
 
-        .quality-value {
-            min-width: 40px;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        /* ===== TEMPLATE / AUTO ===== */
         .template-section,
         .auto-process-section {
             margin: 20px 0;
@@ -348,7 +295,6 @@
             background-color: #e8f5e9;
             border-left: 4px solid var(--success);
         }
-
         .template-buttons {
             display: flex;
             flex-wrap: wrap;
@@ -356,26 +302,28 @@
             margin-top: 12px;
         }
 
-        /* ===== NAVEGACIÓN ===== */
         .navigation-buttons {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             gap: 10px;
             margin-top: 20px;
+            position: sticky;
+            bottom: 10px;
+            background: rgba(255,255,255,0.95);
+            padding: 10px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
         }
-        .navigation-buttons .btn {
-            flex: 1 1 150px;
-        }
+        .navigation-buttons .btn { flex: 1 1 150px; }
 
-        /* ===== GRID TABLEROS ===== */
         .chessboards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: clamp(15px, 2vw, 25px);
             margin-top: 20px;
         }
-
         .chessboard-item {
             border: 1px solid #ddd;
             border-radius: var(--border-radius);
@@ -384,13 +332,6 @@
             transition: var(--transition);
             background: white;
         }
-        @media (hover: hover) {
-            .chessboard-item:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-            }
-        }
-
         .chessboard-img {
             width: 100%;
             aspect-ratio: 1 / 1;
@@ -398,30 +339,10 @@
             background-color: #f8f9fa;
             padding: 8px;
         }
+        .chessboard-actions { display: flex; padding: 8px; background-color: #f8f9fa; justify-content: center; gap: 5px; flex-wrap: wrap; }
+        .chessboard-actions .btn { flex: 1 1 40px; min-height: 40px; padding: 4px 8px; }
+        .chessboard-info { padding: 8px; text-align: center; font-weight: 500; background-color: var(--light); font-size: 0.9rem; }
 
-        .chessboard-actions {
-            display: flex;
-            padding: 8px;
-            background-color: #f8f9fa;
-            justify-content: center;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        .chessboard-actions .btn {
-            flex: 1 1 40px;
-            min-height: 40px;
-            padding: 4px 8px;
-        }
-
-        .chessboard-info {
-            padding: 8px;
-            text-align: center;
-            font-weight: 500;
-            background-color: var(--light);
-            font-size: 0.9rem;
-        }
-
-        /* ===== PDF PREVIEW ===== */
         .pdf-preview {
             border: 1px solid #ddd;
             margin-top: 20px;
@@ -430,7 +351,6 @@
             border-radius: var(--border-radius);
             overflow-x: auto;
         }
-
         .page {
             width: 100%;
             max-width: 800px;
@@ -443,7 +363,6 @@
             display: flex;
             flex-direction: column;
         }
-
         .page-content {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -451,7 +370,6 @@
             gap: clamp(10px, 1.5vw, 20px);
             flex: 1;
         }
-
         .page-cell {
             border: 1px solid #eee;
             display: flex;
@@ -463,12 +381,7 @@
             border-radius: 4px;
             min-height: 130px;
         }
-        .page-cell img {
-            max-width: 70%;
-            max-height: 70%;
-            margin-bottom: 5px;
-        }
-
+        .page-cell img { max-width: 70%; max-height: 70%; margin-bottom: 5px; }
         .page-header {
             text-align: center;
             font-weight: bold;
@@ -478,7 +391,6 @@
             border-radius: 4px;
             font-size: clamp(0.9rem, 1.2vw, 1.1rem);
         }
-
         .page-footer {
             text-align: center;
             margin-top: 12px;
@@ -492,25 +404,16 @@
             flex-wrap: wrap;
             gap: 5px;
         }
+        .answer-lines { width: 100%; margin-top: 4px; }
+        .line { border-bottom: 1px solid #ccc; margin-bottom: 4px; height: 6px; width: 100%; }
 
-        .answer-lines {
-            width: 100%;
-            margin-top: 4px;
-        }
-        .line {
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 4px;
-            height: 6px;
-            width: 100%;
-        }
-
-        /* ===== UTILIDADES ===== */
         .hidden { display: none !important; }
 
         .notification {
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
             padding: 15px 25px;
             background-color: var(--success);
             color: white;
@@ -518,17 +421,17 @@
             box-shadow: var(--box-shadow);
             z-index: 1000;
             opacity: 0;
-            transform: translateX(100px);
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 12px;
             font-size: 1rem;
             max-width: 90vw;
+            white-space: nowrap;
         }
         .notification.show {
             opacity: 1;
-            transform: translateX(0);
+            transform: translateX(-50%) translateY(0);
         }
 
         .badge {
@@ -551,21 +454,6 @@
             margin-bottom: 15px;
         }
 
-        .step-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            background-color: var(--secondary);
-            color: white;
-            border-radius: 50%;
-            margin-right: 8px;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        /* ===== FOCUS VISIBLE ===== */
         .btn:focus-visible,
         .form-control:focus-visible,
         input:focus-visible {
@@ -573,96 +461,53 @@
             outline-offset: 2px;
         }
 
-        /* ===== RESPONSIVE TÁCTIL ===== */
+        .processing-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (pointer: coarse) {
-            .btn {
-                padding: 14px 24px;
-                font-size: 1.1rem;
-                min-height: 52px;
-            }
-            .btn-sm {
-                padding: 10px 16px;
-                font-size: 1rem;
-                min-height: 44px;
-            }
-            .form-control {
-                padding: 14px 18px;
-                font-size: 1.1rem;
-                min-height: 52px;
-            }
-            .quality-control {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .navigation-buttons .btn {
-                flex: 1 1 100%;
-            }
-            .template-buttons .btn {
-                flex: 1 1 100%;
-            }
-            .chessboards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            }
-            .page-content {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-            .page-cell {
-                min-height: 100px;
-            }
+            .btn { padding: 14px 24px; font-size: 1.1rem; min-height: 52px; }
+            .btn-sm { padding: 10px 16px; font-size: 1rem; min-height: 44px; }
+            .form-control { padding: 14px 18px; font-size: 1.1rem; min-height: 52px; }
+            .quality-control { flex-direction: column; align-items: stretch; }
+            .navigation-buttons .btn { flex: 1 1 100%; }
+            .template-buttons .btn { flex: 1 1 100%; }
+            .chessboards-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+            .page-content { grid-template-columns: 1fr 1fr; gap: 8px; }
+            .page-cell { min-height: 100px; }
         }
 
-        /* ===== PANTALLAS PEQUEÑAS ===== */
         @media (max-width: 640px) {
-            .app-container {
-                padding: 10px;
-            }
-            .chessboards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-                gap: 10px;
-            }
-            .page-content {
-                grid-template-columns: 1fr 1fr;
-                gap: 6px;
-            }
-            .page-cell {
-                min-height: 80px;
-                padding: 4px;
-            }
-            .page-cell img {
-                max-width: 60%;
-                max-height: 60%;
-            }
-            .navigation-buttons {
-                flex-direction: column;
-            }
-            .card-header h2 {
-                font-size: 1.1rem;
-            }
+            .app-container { padding: 10px; }
+            .chessboards-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+            .page-content { gap: 6px; }
+            .page-cell { min-height: 80px; padding: 4px; }
+            .page-cell img { max-width: 60%; max-height: 60%; }
+            .navigation-buttons { flex-direction: column; }
+            .card-header h2 { font-size: 1.1rem; }
         }
 
-        /* ===== PANTALLAS GRANDES ===== */
         @media (min-width: 1400px) {
-            .chessboards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            }
-            .page-content {
-                gap: 25px;
-            }
-            .page-cell {
-                min-height: 200px;
-            }
+            .chessboards-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+            .page-content { gap: 25px; }
+            .page-cell { min-height: 200px; }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- ===== DIAGNÓSTICO DE LIBRERÍAS ===== -->
         <div id="libError" class="hidden" style="background:#fdecea; color:#611a15; border:1px solid #f5c6cb; border-radius:8px; padding:14px 18px; margin-bottom:20px; font-weight:500;">
-            ⚠️ Algunas librerías necesarias no se cargaron (revisa tu conexión a internet o si algo está bloqueando cdnjs.cloudflare.com). Recarga la página; si el problema sigue, algunos botones no funcionarán.
+            ⚠️ Algunas librerías necesarias no se cargaron. Recarga la página; si el problema sigue, algunos botones no funcionarán.
         </div>
 
-        <!-- ===== DIAGNÓSTICO DE ESTADO MEJORADO ===== -->
         <div id="diagnostic">
             <strong>🔍 Diagnóstico:</strong><br>
             <span id="diagStatus">Cargando...</span>
@@ -677,12 +522,10 @@
             <p><strong><i class="fas fa-info-circle"></i> Instrucciones:</strong></p>
             <ol>
                 <li>Sube una o más capturas de pantalla que contengan tableros de ajedrez</li>
-                <li>Navega entre las imágenes usando los botones anterior/siguiente</li>
-                <li>Ajusta el recuadro para seleccionar solo el tablero (arrastra y usa las asas)</li>
+                <li>Navega entre las imágenes y ajusta el recuadro (arrastra y usa las asas)</li>
                 <li>Guarda el recorte como plantilla si deseas aplicarlo a imágenes similares</li>
                 <li>Guarda el tablero recortado</li>
-                <li>Repite el proceso para agregar más tableros (máximo 6 por página PDF)</li>
-                <li>Genera y descarga el PDF con tus ejercicios en tamaño A4</li>
+                <li>Genera y descarga el PDF con tus ejercicios en tamaño A4 (máximo 6 por página)</li>
             </ol>
         </div>
 
@@ -702,7 +545,7 @@
                 <i class="fas fa-crop-alt"></i>
                 <h2>Paso 2: Seleccionar tablero</h2>
             </div>
-            <p>Arrastra y ajusta el recuadro para seleccionar solo el tablero de ajedrez</p>
+            <p>Arrastra y ajusta el recuadro para seleccionar solo el tablero. Puedes hacer zoom con dos dedos.</p>
 
             <div class="image-counter" id="imageCounter">Imagen 1 de 1</div>
 
@@ -716,13 +559,13 @@
                 <span class="form-label">Resolución de imagen:</span>
                 <select id="resolutionSelect" class="form-control">
                     <option value="1">Alta (recomendado para PDF)</option>
-                    <option value="0.75" selected>Media (equilibrio tamaño/calidad)</option>
+                    <option value="0.75" selected>Media (equilibrio)</option>
                     <option value="0.5">Baja (PDF más liviano)</option>
                 </select>
             </div>
 
             <div id="cropContainer">
-                <img id="imageToCrop" src="" alt="Imagen para recortar">
+                <img id="imageToCrop" src="" alt="Imagen para recortar" draggable="false">
                 <div class="crop-box hidden">
                     <div class="resize-handle resize-nw"></div>
                     <div class="resize-handle resize-ne"></div>
@@ -731,9 +574,13 @@
                 </div>
             </div>
 
+            <button id="resetCropBtn" class="btn btn-outline btn-sm" style="margin-top:10px;">
+                <i class="fas fa-undo"></i> Restablecer recorte
+            </button>
+
             <div class="template-section">
                 <h3><i class="fas fa-clone"></i> Plantilla de recorte</h3>
-                <p>Si tienes múltiples imágenes con el mismo formato, puedes guardar este recorte como plantilla y aplicarlo a otras imágenes.</p>
+                <p>Guarda este recorte como plantilla para aplicarlo a otras imágenes con el mismo formato.</p>
                 <div class="template-buttons">
                     <button id="saveTemplateBtn" class="btn btn-outline">
                         <i class="fas fa-save"></i> Guardar recorte como plantilla
@@ -742,14 +589,14 @@
                         <i class="fas fa-paste"></i> Aplicar plantilla a esta imagen
                     </button>
                     <button id="applyToAllBtn" class="btn btn-outline" disabled>
-                        <i class="fas fa-clone"></i> Aplicar plantilla a todas las imágenes
+                        <i class="fas fa-clone"></i> Aplicar a todas las imágenes
                     </button>
                 </div>
             </div>
 
             <div class="auto-process-section">
                 <h3><i class="fas fa-cogs"></i> Procesamiento automático</h3>
-                <p>Si todas tus imágenes tienen el mismo formato, puedes procesarlas automáticamente.</p>
+                <p>Procesa todas las imágenes automáticamente usando el recorte actual o plantilla guardada.</p>
                 <div class="template-buttons">
                     <button id="processAllBtn" class="btn btn-success">
                         <i class="fas fa-bolt"></i> Procesar todas las imágenes
@@ -788,16 +635,12 @@
                 <i class="fas fa-file-pdf"></i>
                 <h2>Vista previa del PDF <span class="badge badge-light" id="pagesCount">1 página</span></h2>
             </div>
-
             <div class="pdf-controls">
                 <h3><i class="fas fa-sliders-h"></i> Personalizar PDF</h3>
                 <input type="text" id="headerInput" class="form-control" placeholder="Encabezado del PDF (opcional)">
                 <input type="text" id="footerInput" class="form-control" placeholder="Pie de página del PDF (opcional)">
             </div>
-
-            <div id="pdfPreview" class="pdf-preview">
-                <!-- Las páginas se generan dinámicamente -->
-            </div>
+            <div id="pdfPreview" class="pdf-preview"></div>
             <button id="generatePdfBtn" class="btn btn-success">
                 <i class="fas fa-download"></i> Generar y Descargar PDF
             </button>
@@ -805,769 +648,758 @@
     </div>
 
     <div class="notification hidden" id="notification">
-        <i class="fas fa-check-circle"></i>
-        <span id="notificationText">Tablero guardado correctamente</span>
+        <span id="notificationText"></span>
     </div>
 
     <script>
-        // ===== VARIABLES GLOBALES =====
-        let originalImage = null;
-        let cropBox = null;
-        let isDragging = false;
-        let isResizing = false;
-        let resizeDirection = null;
-        let startX, startY;
-        let cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight;
-        let savedChessboards = [];
-        let imageQuality = 0.7;
-        let resolutionFactor = 0.75;
-        let editingIndex = -1;
+        (function() {
+            // ===== VARIABLES GLOBALES =====
+            let originalImage = null;
+            let cropBox = null;
+            let isDragging = false;
+            let isResizing = false;
+            let resizeDirection = null;
+            let startX, startY;
+            let cropBoxX, cropBoxY, cropBoxWidth, cropBoxHeight;
+            let savedChessboards = [];
+            let imageQuality = 0.7;
+            let resolutionFactor = 0.75;
+            let editingIndex = -1;
+            let imageFiles = [];
+            let currentImageIndex = 0;
+            let cropTemplate = null;
+            let templateAppliedToAll = false;
+            let isProcessing = false;
 
-        let imageFiles = [];
-        let currentImageIndex = 0;
+            // ===== DOM REFS =====
+            const imageInput = document.getElementById('imageInput');
+            const loadImageBtn = document.getElementById('loadImageBtn');
+            const cropSection = document.getElementById('cropSection');
+            const imageToCrop = document.getElementById('imageToCrop');
+            const cropContainer = document.getElementById('cropContainer');
+            const cropBtn = document.getElementById('cropBtn');
+            const prevImageBtn = document.getElementById('prevImageBtn');
+            const nextImageBtn = document.getElementById('nextImageBtn');
+            const imageCounter = document.getElementById('imageCounter');
+            const previewSection = document.getElementById('previewSection');
+            const chessboardsContainer = document.getElementById('chessboards');
+            const chessboardsCount = document.getElementById('chessboardsCount');
+            const pdfSection = document.getElementById('pdfSection');
+            const pdfPreview = document.getElementById('pdfPreview');
+            const pagesCount = document.getElementById('pagesCount');
+            const generatePdfBtn = document.getElementById('generatePdfBtn');
+            const qualitySlider = document.getElementById('qualitySlider');
+            const qualityValue = document.getElementById('qualityValue');
+            const resolutionSelect = document.getElementById('resolutionSelect');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+            const applyTemplateBtn = document.getElementById('applyTemplateBtn');
+            const applyToAllBtn = document.getElementById('applyToAllBtn');
+            const headerInput = document.getElementById('headerInput');
+            const footerInput = document.getElementById('footerInput');
+            const processAllBtn = document.getElementById('processAllBtn');
+            const clearAllBtn = document.getElementById('clearAllBtn');
+            const resetCropBtn = document.getElementById('resetCropBtn');
+            const libError = document.getElementById('libError');
+            const diagStatus = document.getElementById('diagStatus');
 
-        let cropTemplate = null;
-        let templateAppliedToAll = false;
+            // ===== DIAGNÓSTICO =====
+            function updateDiagnostic() {
+                const filesCount = imageFiles.length;
+                const inputFilesCount = imageInput.files ? imageInput.files.length : 0;
+                const loadDisabled = loadImageBtn.disabled;
+                const cropHidden = cropSection.classList.contains('hidden');
+                const savedCount = savedChessboards.length;
 
-        // ===== DOM REFS =====
-        const imageInput = document.getElementById('imageInput');
-        const loadImageBtn = document.getElementById('loadImageBtn');
-        const cropSection = document.getElementById('cropSection');
-        const imageToCrop = document.getElementById('imageToCrop');
-        const cropContainer = document.getElementById('cropContainer');
-        const cropBtn = document.getElementById('cropBtn');
-        const prevImageBtn = document.getElementById('prevImageBtn');
-        const nextImageBtn = document.getElementById('nextImageBtn');
-        const imageCounter = document.getElementById('imageCounter');
-        const previewSection = document.getElementById('previewSection');
-        const chessboardsContainer = document.getElementById('chessboards');
-        const chessboardsCount = document.getElementById('chessboardsCount');
-        const pdfSection = document.getElementById('pdfSection');
-        const pdfPreview = document.getElementById('pdfPreview');
-        const pagesCount = document.getElementById('pagesCount');
-        const generatePdfBtn = document.getElementById('generatePdfBtn');
-        const qualitySlider = document.getElementById('qualitySlider');
-        const qualityValue = document.getElementById('qualityValue');
-        const resolutionSelect = document.getElementById('resolutionSelect');
-        const notification = document.getElementById('notification');
-        const notificationText = document.getElementById('notificationText');
-        const saveTemplateBtn = document.getElementById('saveTemplateBtn');
-        const applyTemplateBtn = document.getElementById('applyTemplateBtn');
-        const applyToAllBtn = document.getElementById('applyToAllBtn');
-        const headerInput = document.getElementById('headerInput');
-        const footerInput = document.getElementById('footerInput');
-        const processAllBtn = document.getElementById('processAllBtn');
-        const clearAllBtn = document.getElementById('clearAllBtn');
-        const libError = document.getElementById('libError');
-        const diagStatus = document.getElementById('diagStatus');
+                let statusHTML = `
+                    📁 En memoria: ${filesCount} | 📂 En input: ${inputFilesCount} | 
+                    🔘 Cargar: ${loadDisabled ? '🔴' : '🟢'} | 📐 Recorte: ${cropHidden ? '⬛' : '🟩'} | 
+                    ♟️ Guardados: ${savedCount}
+                `;
+                if (inputFilesCount > 0 && filesCount === 0) {
+                    statusHTML += `<br><span class="diag-warning">⚠️ Archivos en input pero no en memoria. Se recuperarán al cargar.</span>`;
+                }
+                diagStatus.innerHTML = statusHTML;
+            }
 
-        // ===== DIAGNÓSTICO MEJORADO =====
-        function updateDiagnostic() {
-            const filesCount = imageFiles.length;
-            const inputFilesCount = imageInput.files ? imageInput.files.length : 0;
-            const loadDisabled = loadImageBtn.disabled;
-            const cropHidden = cropSection.classList.contains('hidden');
-            const savedCount = savedChessboards.length;
+            // ===== LIBRERÍAS =====
+            if (window.__jspdfFallo || typeof window.jspdf === 'undefined') {
+                libError.classList.remove('hidden');
+            }
 
-            let statusHTML = `
-                <strong>📁 Archivos en memoria (imageFiles):</strong> ${filesCount} &nbsp;|&nbsp;
-                <strong>📂 Archivos en input (input.files):</strong> ${inputFilesCount} &nbsp;|&nbsp;
-                <strong>🔘 Botón "Cargar":</strong> ${loadDisabled ? '🔴 Deshabilitado' : '🟢 Habilitado'} &nbsp;|&nbsp;
-                <strong>📐 Sección recorte:</strong> ${cropHidden ? '⬛ Oculto' : '🟩 Visible'} &nbsp;|&nbsp;
-                <strong>♟️ Tableros guardados:</strong> ${savedCount}
-            `;
+            // ===== FUNCIONES DEL CROP BOX =====
+            function getImageDisplayDimensions() {
+                const displayedW = imageToCrop.width || imageToCrop.naturalWidth || 400;
+                const displayedH = imageToCrop.height || imageToCrop.naturalHeight || 300;
+                return { w: displayedW, h: displayedH };
+            }
 
-            // Agregar advertencia si hay inconsistencia
-            if (inputFilesCount > 0 && filesCount === 0) {
-                statusHTML += `<br><span class="diag-warning">⚠️ Hay archivos en input pero no en imageFiles. Ejecutando recuperación automática...</span>`;
-                // Intento de recuperación
-                setTimeout(() => {
-                    if (imageInput.files && imageInput.files.length > 0) {
-                        imageFiles = Array.from(imageInput.files);
-                        loadImageBtn.disabled = false;
-                        showNotification(`✅ Recuperados ${imageFiles.length} archivo(s) automáticamente`);
-                        updateDiagnostic();
+            function setDefaultCropBox() {
+                const { w, h } = getImageDisplayDimensions();
+                cropBoxX = w * 0.25;
+                cropBoxY = h * 0.25;
+                cropBoxWidth = w * 0.5;
+                cropBoxHeight = h * 0.5;
+            }
+
+            function initCropBox() {
+                cropBox = document.querySelector('.crop-box');
+                if (!cropBox) return;
+
+                const { w, h } = getImageDisplayDimensions();
+                if (cropTemplate && templateAppliedToAll) {
+                    cropBoxX = cropTemplate.x * w;
+                    cropBoxY = cropTemplate.y * h;
+                    cropBoxWidth = cropTemplate.width * w;
+                    cropBoxHeight = cropTemplate.height * h;
+                } else if (!cropTemplate) {
+                    setDefaultCropBox();
+                } else {
+                    // Hay plantilla pero no aplicada a todas: aplicar a esta imagen
+                    cropBoxX = cropTemplate.x * w;
+                    cropBoxY = cropTemplate.y * h;
+                    cropBoxWidth = cropTemplate.width * w;
+                    cropBoxHeight = cropTemplate.height * h;
+                }
+                updateCropBox();
+
+                // Remover listeners previos para evitar duplicados
+                const handles = cropBox.querySelectorAll('.resize-handle');
+                handles.forEach(handle => {
+                    handle.removeEventListener('pointerdown', startResizePointer);
+                    handle.addEventListener('pointerdown', startResizePointer);
+                });
+
+                cropBox.removeEventListener('pointerdown', startDragPointer);
+                cropBox.addEventListener('pointerdown', startDragPointer);
+
+                document.removeEventListener('pointermove', handlePointerMove);
+                document.removeEventListener('pointerup', stopInteractionPointer);
+                document.addEventListener('pointermove', handlePointerMove);
+                document.addEventListener('pointerup', stopInteractionPointer);
+                document.addEventListener('pointercancel', stopInteractionPointer);
+
+                cropBox.classList.remove('hidden');
+                cropBtn.disabled = false;
+                updateTemplateButtons();
+            }
+
+            function updateCropBox() {
+                if (!cropBox) return;
+                cropBox.style.left = cropBoxX + 'px';
+                cropBox.style.top = cropBoxY + 'px';
+                cropBox.style.width = cropBoxWidth + 'px';
+                cropBox.style.height = cropBoxHeight + 'px';
+            }
+
+            // ---- Pointer Events (unifican ratón y táctil) ----
+            function startDragPointer(e) {
+                if (e.target.classList.contains('resize-handle')) return;
+                if (e.pointerType === 'touch' && e.isPrimary === false) return;
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                cropBoxX = parseInt(cropBox.style.left);
+                cropBoxY = parseInt(cropBox.style.top);
+                cropBox.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            }
+
+            function startResizePointer(e) {
+                if (e.pointerType === 'touch' && e.isPrimary === false) return;
+                isResizing = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                cropBoxX = parseInt(cropBox.style.left);
+                cropBoxY = parseInt(cropBox.style.top);
+                cropBoxWidth = parseInt(cropBox.style.width);
+                cropBoxHeight = parseInt(cropBox.style.height);
+                resizeDirection = e.target.classList[1];
+                e.target.setPointerCapture(e.pointerId);
+                e.preventDefault();
+            }
+
+            function handlePointerMove(e) {
+                if (!isDragging && !isResizing) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                performMove(dx, dy);
+                startX = e.clientX;
+                startY = e.clientY;
+                e.preventDefault();
+            }
+
+            function performMove(dx, dy) {
+                const { w: imgW, h: imgH } = getImageDisplayDimensions();
+                if (isDragging) {
+                    let newX = cropBoxX + dx;
+                    let newY = cropBoxY + dy;
+                    newX = Math.max(0, Math.min(imgW - cropBoxWidth, newX));
+                    newY = Math.max(0, Math.min(imgH - cropBoxHeight, newY));
+                    cropBoxX = newX;
+                    cropBoxY = newY;
+                } else if (isResizing) {
+                    const minSize = 40;
+                    switch (resizeDirection) {
+                        case 'resize-nw':
+                            if (cropBoxX + dx >= 0 && cropBoxWidth - dx >= minSize) { cropBoxX += dx; cropBoxWidth -= dx; }
+                            if (cropBoxY + dy >= 0 && cropBoxHeight - dy >= minSize) { cropBoxY += dy; cropBoxHeight -= dy; }
+                            break;
+                        case 'resize-ne':
+                            if (cropBoxWidth + dx >= minSize) { cropBoxWidth += dx; }
+                            if (cropBoxY + dy >= 0 && cropBoxHeight - dy >= minSize) { cropBoxY += dy; cropBoxHeight -= dy; }
+                            break;
+                        case 'resize-sw':
+                            if (cropBoxX + dx >= 0 && cropBoxWidth - dx >= minSize) { cropBoxX += dx; cropBoxWidth -= dx; }
+                            if (cropBoxHeight + dy >= minSize) { cropBoxHeight += dy; }
+                            break;
+                        case 'resize-se':
+                            if (cropBoxWidth + dx >= minSize) { cropBoxWidth += dx; }
+                            if (cropBoxHeight + dy >= minSize) { cropBoxHeight += dy; }
+                            break;
                     }
-                }, 100);
-            }
-
-            if (filesCount === 0 && inputFilesCount === 0) {
-                statusHTML += `<br><span class="diag-warning">💡 Selecciona imágenes usando el botón "Examinar"</span>`;
-            }
-
-            diagStatus.innerHTML = statusHTML;
-        }
-
-        // Actualizar diagnóstico cada 2 segundos
-        setInterval(updateDiagnostic, 2000);
-
-        // ===== LIBRERÍAS =====
-        if (window.__jspdfFallo || typeof window.jspdf === 'undefined') {
-            libError.classList.remove('hidden');
-        }
-
-        // ===== FUNCIONES DEL CROP BOX (con soporte táctil) =====
-        function initCropBox() {
-            cropBox = document.querySelector('.crop-box');
-            if (!cropBox) return;
-
-            if (cropTemplate && templateAppliedToAll) {
-                applyCropTemplate();
-            } else if (!cropTemplate) {
-                const imgWidth = imageToCrop.width || 400;
-                const imgHeight = imageToCrop.height || 300;
-                cropBoxX = imgWidth * 0.25;
-                cropBoxY = imgHeight * 0.25;
-                cropBoxWidth = imgWidth * 0.5;
-                cropBoxHeight = imgHeight * 0.5;
+                    cropBoxX = Math.max(0, Math.min(imgW - cropBoxWidth, cropBoxX));
+                    cropBoxY = Math.max(0, Math.min(imgH - cropBoxHeight, cropBoxY));
+                }
                 updateCropBox();
             }
 
-            const handles = cropBox.querySelectorAll('.resize-handle');
-            handles.forEach(handle => {
-                handle.removeEventListener('mousedown', startResize);
-                handle.removeEventListener('touchstart', startResizeTouch);
-                handle.addEventListener('mousedown', startResize);
-                handle.addEventListener('touchstart', startResizeTouch, { passive: false });
-            });
-
-            cropBox.removeEventListener('mousedown', startDrag);
-            cropBox.removeEventListener('touchstart', startDragTouch);
-            cropBox.addEventListener('mousedown', startDrag);
-            cropBox.addEventListener('touchstart', startDragTouch, { passive: false });
-
-            document.removeEventListener('mousemove', handleMove);
-            document.removeEventListener('mouseup', stopInteraction);
-            document.removeEventListener('touchmove', handleMoveTouch);
-            document.removeEventListener('touchend', stopInteractionTouch);
-            document.removeEventListener('touchcancel', stopInteractionTouch);
-
-            document.addEventListener('mousemove', handleMove);
-            document.addEventListener('mouseup', stopInteraction);
-            document.addEventListener('touchmove', handleMoveTouch, { passive: false });
-            document.addEventListener('touchend', stopInteractionTouch);
-            document.addEventListener('touchcancel', stopInteractionTouch);
-
-            cropBox.classList.remove('hidden');
-            cropBtn.disabled = false;
-            updateTemplateButtons();
-        }
-
-        function updateCropBox() {
-            if (!cropBox) return;
-            cropBox.style.left = cropBoxX + 'px';
-            cropBox.style.top = cropBoxY + 'px';
-            cropBox.style.width = cropBoxWidth + 'px';
-            cropBox.style.height = cropBoxHeight + 'px';
-        }
-
-        // ---- Ratón ----
-        function startDrag(e) {
-            if (e.target.classList.contains('resize-handle')) return;
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            cropBoxX = parseInt(cropBox.style.left);
-            cropBoxY = parseInt(cropBox.style.top);
-            e.preventDefault();
-        }
-
-        function startResize(e) {
-            isResizing = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            cropBoxX = parseInt(cropBox.style.left);
-            cropBoxY = parseInt(cropBox.style.top);
-            cropBoxWidth = parseInt(cropBox.style.width);
-            cropBoxHeight = parseInt(cropBox.style.height);
-            resizeDirection = e.target.classList[1];
-            e.preventDefault();
-        }
-
-        // ---- Táctil ----
-        function startDragTouch(e) {
-            const touch = e.touches[0];
-            if (e.target.classList.contains('resize-handle')) return;
-            isDragging = true;
-            startX = touch.clientX;
-            startY = touch.clientY;
-            cropBoxX = parseInt(cropBox.style.left);
-            cropBoxY = parseInt(cropBox.style.top);
-            e.preventDefault();
-        }
-
-        function startResizeTouch(e) {
-            const touch = e.touches[0];
-            isResizing = true;
-            startX = touch.clientX;
-            startY = touch.clientY;
-            cropBoxX = parseInt(cropBox.style.left);
-            cropBoxY = parseInt(cropBox.style.top);
-            cropBoxWidth = parseInt(cropBox.style.width);
-            cropBoxHeight = parseInt(cropBox.style.height);
-            resizeDirection = e.target.classList[1];
-            e.preventDefault();
-        }
-
-        // ---- Movimiento ----
-        function handleMove(e) {
-            if (!isDragging && !isResizing) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            performMove(dx, dy);
-            startX = e.clientX;
-            startY = e.clientY;
-        }
-
-        function handleMoveTouch(e) {
-            if (!isDragging && !isResizing) return;
-            const touch = e.touches[0];
-            const dx = touch.clientX - startX;
-            const dy = touch.clientY - startY;
-            performMove(dx, dy);
-            startX = touch.clientX;
-            startY = touch.clientY;
-            e.preventDefault();
-        }
-
-        function performMove(dx, dy) {
-            const imgW = imageToCrop.width || 400;
-            const imgH = imageToCrop.height || 300;
-
-            if (isDragging) {
-                let newX = cropBoxX + dx;
-                let newY = cropBoxY + dy;
-                newX = Math.max(0, Math.min(imgW - cropBoxWidth, newX));
-                newY = Math.max(0, Math.min(imgH - cropBoxHeight, newY));
-                cropBoxX = newX;
-                cropBoxY = newY;
-            } else if (isResizing) {
-                const minSize = 40;
-                switch (resizeDirection) {
-                    case 'resize-nw':
-                        if (cropBoxX + dx >= 0 && cropBoxWidth - dx >= minSize) {
-                            cropBoxX += dx;
-                            cropBoxWidth -= dx;
-                        }
-                        if (cropBoxY + dy >= 0 && cropBoxHeight - dy >= minSize) {
-                            cropBoxY += dy;
-                            cropBoxHeight -= dy;
-                        }
-                        break;
-                    case 'resize-ne':
-                        if (cropBoxWidth + dx >= minSize) {
-                            cropBoxWidth += dx;
-                        }
-                        if (cropBoxY + dy >= 0 && cropBoxHeight - dy >= minSize) {
-                            cropBoxY += dy;
-                            cropBoxHeight -= dy;
-                        }
-                        break;
-                    case 'resize-sw':
-                        if (cropBoxX + dx >= 0 && cropBoxWidth - dx >= minSize) {
-                            cropBoxX += dx;
-                            cropBoxWidth -= dx;
-                        }
-                        if (cropBoxHeight + dy >= minSize) {
-                            cropBoxHeight += dy;
-                        }
-                        break;
-                    case 'resize-se':
-                        if (cropBoxWidth + dx >= minSize) {
-                            cropBoxWidth += dx;
-                        }
-                        if (cropBoxHeight + dy >= minSize) {
-                            cropBoxHeight += dy;
-                        }
-                        break;
-                }
-                cropBoxX = Math.max(0, Math.min(imgW - cropBoxWidth, cropBoxX));
-                cropBoxY = Math.max(0, Math.min(imgH - cropBoxHeight, cropBoxY));
-            }
-            updateCropBox();
-        }
-
-        function stopInteraction() {
-            isDragging = false;
-            isResizing = false;
-        }
-        function stopInteractionTouch(e) {
-            isDragging = false;
-            isResizing = false;
-            e.preventDefault();
-        }
-
-        // ===== RECALCULAR AL CAMBIAR TAMAÑO / ORIENTACIÓN =====
-        function recalcCropBox() {
-            if (!cropTemplate || !cropBox) return;
-            const imgW = imageToCrop.width;
-            const imgH = imageToCrop.height;
-            if (imgW === 0 || imgH === 0) return;
-            cropBoxX = cropTemplate.x * imgW;
-            cropBoxY = cropTemplate.y * imgH;
-            cropBoxWidth = cropTemplate.width * imgW;
-            cropBoxHeight = cropTemplate.height * imgH;
-            updateCropBox();
-        }
-
-        window.addEventListener('resize', recalcCropBox);
-        window.addEventListener('orientationchange', function() {
-            setTimeout(recalcCropBox, 300);
-        });
-
-        // ===== RECORTAR IMAGEN =====
-        function cropImage() {
-            if (!originalImage || !cropBox) return null;
-            const canvasWidth = cropBoxWidth * resolutionFactor;
-            const canvasHeight = cropBoxHeight * resolutionFactor;
-            const canvas = document.createElement('canvas');
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
-            const ctx = canvas.getContext('2d');
-
-            const scaleX = originalImage.width / imageToCrop.width;
-            const scaleY = originalImage.height / imageToCrop.height;
-
-            ctx.drawImage(
-                originalImage,
-                cropBoxX * scaleX, cropBoxY * scaleY,
-                cropBoxWidth * scaleX, cropBoxHeight * scaleY,
-                0, 0,
-                canvasWidth, canvasHeight
-            );
-            return canvas.toDataURL('image/jpeg', imageQuality);
-        }
-
-        // ===== NOTIFICACIONES =====
-        function showNotification(message) {
-            notificationText.textContent = message;
-            notification.classList.add('show');
-            clearTimeout(window.notifTimeout);
-            window.notifTimeout = setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
-
-        // ===== MANEJO DE TABLEROS =====
-        function addChessboard(dataUrl) {
-            if (editingIndex >= 0) {
-                savedChessboards[editingIndex] = dataUrl;
-                showNotification('Tablero actualizado correctamente');
-                editingIndex = -1;
-            } else {
-                savedChessboards.push(dataUrl);
-                showNotification('Tablero guardado correctamente');
-            }
-            updateChessboardsDisplay();
-            if (currentImageIndex < imageFiles.length - 1) {
-                nextImage();
-            } else {
-                resetCropSection();
-            }
-        }
-
-        function resetCropSection() {
-            cropSection.classList.add('hidden');
-            // No limpiamos imageInput ni imageFiles para poder reutilizar
-            currentImageIndex = 0;
-            templateAppliedToAll = false;
-            updateDiagnostic();
-        }
-
-        function startEdit(index) {
-            editingIndex = index;
-            originalImage = new Image();
-            originalImage.onload = function() {
-                imageToCrop.src = savedChessboards[index];
-                cropSection.classList.remove('hidden');
-                setTimeout(initCropBox, 100);
-            };
-            originalImage.src = savedChessboards[index];
-        }
-
-        function updateChessboardsDisplay() {
-            chessboardsContainer.innerHTML = '';
-            chessboardsCount.textContent = savedChessboards.length;
-
-            savedChessboards.forEach((dataUrl, index) => {
-                const item = document.createElement('div');
-                item.className = 'chessboard-item';
-                item.innerHTML = `
-                    <img src="${dataUrl}" alt="Tablero ${index+1}" class="chessboard-img">
-                    <div class="chessboard-info">Tablero ${index+1}</div>
-                    <div class="chessboard-actions">
-                        <button class="btn btn-warning btn-sm replace-btn" data-index="${index}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm remove-btn" data-index="${index}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                chessboardsContainer.appendChild(item);
-                item.querySelector('.remove-btn').addEventListener('click', function() {
-                    const idx = parseInt(this.dataset.index);
-                    savedChessboards.splice(idx, 1);
-                    updateChessboardsDisplay();
-                    showNotification('Tablero eliminado');
-                });
-                item.querySelector('.replace-btn').addEventListener('click', function() {
-                    const idx = parseInt(this.dataset.index);
-                    startEdit(idx);
-                });
-            });
-
-            updatePdfPreview();
-            if (savedChessboards.length > 0) {
-                previewSection.classList.remove('hidden');
-                pdfSection.classList.remove('hidden');
-            } else {
-                previewSection.classList.add('hidden');
-                pdfSection.classList.add('hidden');
-            }
-            updateDiagnostic();
-        }
-
-        // ===== VISTA PREVIA DEL PDF =====
-        function updatePdfPreview() {
-            pdfPreview.innerHTML = '';
-            const itemsPerPage = 6;
-            const pageCount = Math.ceil(savedChessboards.length / itemsPerPage);
-            pagesCount.textContent = `${pageCount} ${pageCount === 1 ? 'página' : 'páginas'}`;
-
-            const headerText = headerInput.value;
-            const footerText = footerInput.value;
-
-            for (let p = 0; p < pageCount; p++) {
-                const page = document.createElement('div');
-                page.className = 'page';
-                if (headerText) {
-                    const h = document.createElement('div');
-                    h.className = 'page-header';
-                    h.textContent = headerText;
-                    page.appendChild(h);
-                }
-                const content = document.createElement('div');
-                content.className = 'page-content';
-
-                for (let i = 0; i < itemsPerPage; i++) {
-                    const idx = p * itemsPerPage + i;
-                    const cell = document.createElement('div');
-                    cell.className = 'page-cell';
-                    const num = document.createElement('div');
-                    num.textContent = `${idx+1}`;
-                    num.style.cssText = 'font-weight:bold; margin-bottom:2px;';
-                    cell.appendChild(num);
-                    if (idx < savedChessboards.length) {
-                        const img = document.createElement('img');
-                        img.src = savedChessboards[idx];
-                        img.loading = 'lazy';
-                        cell.appendChild(img);
-                        const lines = document.createElement('div');
-                        lines.className = 'answer-lines';
-                        for (let j = 0; j < 3; j++) {
-                            const line = document.createElement('div');
-                            line.className = 'line';
-                            lines.appendChild(line);
-                        }
-                        cell.appendChild(lines);
+            function stopInteractionPointer(e) {
+                if (isDragging || isResizing) {
+                    isDragging = false;
+                    isResizing = false;
+                    if (e.target && e.target.releasePointerCapture) {
+                        e.target.releasePointerCapture(e.pointerId);
                     }
-                    content.appendChild(cell);
                 }
-                page.appendChild(content);
+            }
 
-                const footer = document.createElement('div');
-                footer.className = 'page-footer';
-                const pNum = document.createElement('span');
-                pNum.textContent = `Página ${p+1}`;
-                footer.appendChild(pNum);
-                if (footerText) {
-                    const ft = document.createElement('span');
-                    ft.textContent = footerText;
-                    footer.appendChild(ft);
+            function resetCropBox() {
+                setDefaultCropBox();
+                updateCropBox();
+                showNotification('Recuadro restablecido');
+            }
+
+            // ===== RECALCULAR AL CAMBIAR TAMAÑO / ORIENTACIÓN =====
+            function recalcCropBox() {
+                if (!cropBox || !cropBox.classList.contains('hidden')) {
+                    const { w, h } = getImageDisplayDimensions();
+                    if (w === 0 || h === 0) return;
+                    if (cropTemplate) {
+                        cropBoxX = cropTemplate.x * w;
+                        cropBoxY = cropTemplate.y * h;
+                        cropBoxWidth = cropTemplate.width * w;
+                        cropBoxHeight = cropTemplate.height * h;
+                    } else {
+                        setDefaultCropBox();
+                    }
+                    updateCropBox();
                 }
-                page.appendChild(footer);
-                pdfPreview.appendChild(page);
             }
-        }
 
-        // ===== GENERAR PDF =====
-        function generatePdf() {
-            if (savedChessboards.length === 0) return;
-            if (typeof window.jspdf === 'undefined') {
-                showNotification('❌ No se pudo generar el PDF: la librería no cargó. Verifica tu conexión y recarga la página.');
-                return;
+            window.addEventListener('resize', () => {
+                if (!cropSection.classList.contains('hidden')) {
+                    setTimeout(recalcCropBox, 150);
+                }
+            });
+            window.addEventListener('orientationchange', () => {
+                if (!cropSection.classList.contains('hidden')) {
+                    setTimeout(recalcCropBox, 400);
+                }
+            });
+
+            // ===== RECORTAR IMAGEN =====
+            function cropImage() {
+                if (!originalImage || !cropBox) return null;
+                const canvasWidth = cropBoxWidth * resolutionFactor;
+                const canvasHeight = cropBoxHeight * resolutionFactor;
+                const canvas = document.createElement('canvas');
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+                const ctx = canvas.getContext('2d');
+
+                // Calcular escala: naturalWidth / displayedWidth
+                const displayedW = imageToCrop.width || imageToCrop.naturalWidth;
+                const displayedH = imageToCrop.height || imageToCrop.naturalHeight;
+                const scaleX = imageToCrop.naturalWidth / displayedW;
+                const scaleY = imageToCrop.naturalHeight / displayedH;
+
+                ctx.drawImage(
+                    originalImage,
+                    cropBoxX * scaleX, cropBoxY * scaleY,
+                    cropBoxWidth * scaleX, cropBoxHeight * scaleY,
+                    0, 0,
+                    canvasWidth, canvasHeight
+                );
+                return canvas.toDataURL('image/jpeg', imageQuality);
             }
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
+
+            // ===== NOTIFICACIONES =====
+            function showNotification(message, isError = false) {
+                notificationText.innerHTML = message;
+                if (isError) {
+                    notification.style.backgroundColor = 'var(--accent)';
+                } else {
+                    notification.style.backgroundColor = 'var(--success)';
+                }
+                notification.classList.add('show');
+                clearTimeout(window.notifTimeout);
+                window.notifTimeout = setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            // ===== MANEJO DE TABLEROS =====
+            function addChessboard(dataUrl) {
+                if (editingIndex >= 0) {
+                    savedChessboards[editingIndex] = dataUrl;
+                    showNotification('Tablero actualizado correctamente');
+                    editingIndex = -1;
+                } else {
+                    savedChessboards.push(dataUrl);
+                    showNotification('Tablero guardado correctamente');
+                }
+                updateChessboardsDisplay();
+                if (currentImageIndex < imageFiles.length - 1) {
+                    nextImage();
+                } else {
+                    resetCropSection();
+                }
+            }
+
+            function resetCropSection() {
+                cropSection.classList.add('hidden');
+                currentImageIndex = 0;
+                templateAppliedToAll = false;
+                updateDiagnostic();
+            }
+
+            function startEdit(index) {
+                editingIndex = index;
+                originalImage = new Image();
+                originalImage.onload = function() {
+                    imageToCrop.src = savedChessboards[index];
+                    cropSection.classList.remove('hidden');
+                    setTimeout(initCropBox, 100);
+                };
+                originalImage.src = savedChessboards[index];
+            }
+
+            function updateChessboardsDisplay() {
+                chessboardsContainer.innerHTML = '';
+                chessboardsCount.textContent = savedChessboards.length;
+
+                savedChessboards.forEach((dataUrl, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'chessboard-item';
+                    item.innerHTML = `
+                        <img src="${dataUrl}" alt="Tablero ${index+1}" class="chessboard-img" loading="lazy">
+                        <div class="chessboard-info">Tablero ${index+1}</div>
+                        <div class="chessboard-actions">
+                            <button class="btn btn-warning btn-sm replace-btn" data-index="${index}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm remove-btn" data-index="${index}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    chessboardsContainer.appendChild(item);
+                });
+
+                // Delegación de eventos para botones dinámicos
+                chessboardsContainer.querySelectorAll('.remove-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        savedChessboards.splice(idx, 1);
+                        updateChessboardsDisplay();
+                        showNotification('Tablero eliminado');
+                    });
+                });
+                chessboardsContainer.querySelectorAll('.replace-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        startEdit(idx);
+                    });
+                });
+
+                updatePdfPreview();
+                if (savedChessboards.length > 0) {
+                    previewSection.classList.remove('hidden');
+                    pdfSection.classList.remove('hidden');
+                } else {
+                    previewSection.classList.add('hidden');
+                    pdfSection.classList.add('hidden');
+                }
+                updateDiagnostic();
+            }
+
+            // ===== VISTA PREVIA DEL PDF =====
+            function updatePdfPreview() {
+                pdfPreview.innerHTML = '';
                 const itemsPerPage = 6;
                 const pageCount = Math.ceil(savedChessboards.length / itemsPerPage);
-                const imgWidth = 58.5;
-                const imgHeight = 58.5;
-                const positions = [
-                    { x: 27, y: 40 }, { x: 122, y: 40 },
-                    { x: 27, y: 120 }, { x: 122, y: 120 },
-                    { x: 27, y: 200 }, { x: 122, y: 200 }
-                ];
+                pagesCount.textContent = `${pageCount} ${pageCount === 1 ? 'página' : 'páginas'}`;
+
                 const headerText = headerInput.value;
                 const footerText = footerInput.value;
 
-                for (let i = 0; i < savedChessboards.length; i++) {
-                    const pageIdx = Math.floor(i / itemsPerPage);
-                    const posIdx = i % itemsPerPage;
-                    if (posIdx === 0 && i > 0) doc.addPage();
-
+                for (let p = 0; p < pageCount; p++) {
+                    const page = document.createElement('div');
+                    page.className = 'page';
                     if (headerText) {
-                        doc.setFontSize(12);
-                        doc.text(headerText, 105, 20, { align: 'center' });
+                        const h = document.createElement('div');
+                        h.className = 'page-header';
+                        h.textContent = headerText;
+                        page.appendChild(h);
                     }
-                    const cx = positions[posIdx].x + imgWidth / 2;
-                    doc.setFontSize(12);
-                    doc.text(`${i+1}`, cx, positions[posIdx].y - 2.5, { align: 'center' });
-                    doc.addImage(
-                        savedChessboards[i],
-                        'JPEG',
-                        positions[posIdx].x,
-                        positions[posIdx].y,
-                        imgWidth,
-                        imgHeight,
-                        undefined,
-                        'FAST'
-                    );
-                    const lineY = positions[posIdx].y + imgHeight + 6;
-                    for (let j = 0; j < 3; j++) {
-                        doc.line(
-                            positions[posIdx].x,
-                            lineY + j * 4,
-                            positions[posIdx].x + imgWidth,
-                            lineY + j * 4
-                        );
+                    const content = document.createElement('div');
+                    content.className = 'page-content';
+
+                    for (let i = 0; i < itemsPerPage; i++) {
+                        const idx = p * itemsPerPage + i;
+                        const cell = document.createElement('div');
+                        cell.className = 'page-cell';
+                        const num = document.createElement('div');
+                        num.textContent = `${idx+1}`;
+                        num.style.cssText = 'font-weight:bold; margin-bottom:2px;';
+                        cell.appendChild(num);
+                        if (idx < savedChessboards.length) {
+                            const img = document.createElement('img');
+                            img.src = savedChessboards[idx];
+                            img.loading = 'lazy';
+                            cell.appendChild(img);
+                            const lines = document.createElement('div');
+                            lines.className = 'answer-lines';
+                            for (let j = 0; j < 3; j++) {
+                                const line = document.createElement('div');
+                                line.className = 'line';
+                                lines.appendChild(line);
+                            }
+                            cell.appendChild(lines);
+                        }
+                        content.appendChild(cell);
                     }
+                    page.appendChild(content);
+
+                    const footer = document.createElement('div');
+                    footer.className = 'page-footer';
+                    const pNum = document.createElement('span');
+                    pNum.textContent = `Página ${p+1}`;
+                    footer.appendChild(pNum);
                     if (footerText) {
-                        doc.setFontSize(10);
-                        doc.text(footerText, 105, 287, { align: 'center' });
+                        const ft = document.createElement('span');
+                        ft.textContent = footerText;
+                        footer.appendChild(ft);
                     }
+                    page.appendChild(footer);
+                    pdfPreview.appendChild(page);
                 }
-                doc.save('ejercicios_ajedrez.pdf');
-                showNotification('PDF generado y descargado');
-            } catch (err) {
-                console.error('Error al generar el PDF:', err);
-                showNotification('❌ Ocurrió un error al generar el PDF. Revisa la consola (F12) para más detalles.');
             }
-        }
 
-        // ===== NAVEGACIÓN DE IMÁGENES =====
-        function loadCurrentImage() {
-            if (imageFiles.length === 0) {
-                showNotification('⚠️ No hay imágenes cargadas.');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                originalImage = new Image();
-                originalImage.onload = function() {
-                    imageToCrop.src = e.target.result;
-                    setTimeout(initCropBox, 100);
-                };
-                originalImage.src = e.target.result;
-            };
-            reader.onerror = function() {
-                showNotification('❌ Error al leer la imagen. Intenta con otra.');
-            };
-            reader.readAsDataURL(imageFiles[currentImageIndex]);
-            imageCounter.textContent = `Imagen ${currentImageIndex+1} de ${imageFiles.length}`;
-            prevImageBtn.disabled = currentImageIndex === 0;
-            nextImageBtn.disabled = currentImageIndex === imageFiles.length - 1;
-            updateDiagnostic();
-        }
-
-        function prevImage() {
-            if (currentImageIndex > 0) { currentImageIndex--; loadCurrentImage(); }
-        }
-        function nextImage() {
-            if (currentImageIndex < imageFiles.length - 1) { currentImageIndex++; loadCurrentImage(); }
-        }
-
-        // ===== PLANTILLAS =====
-        function saveCropTemplate() {
-            if (!cropBox) return;
-            const imgW = imageToCrop.width;
-            const imgH = imageToCrop.height;
-            cropTemplate = {
-                x: cropBoxX / imgW,
-                y: cropBoxY / imgH,
-                width: cropBoxWidth / imgW,
-                height: cropBoxHeight / imgH
-            };
-            showNotification('Plantilla guardada');
-            updateTemplateButtons();
-        }
-
-        function applyCropTemplate() {
-            if (!cropTemplate) return;
-            const imgW = imageToCrop.width;
-            const imgH = imageToCrop.height;
-            cropBoxX = cropTemplate.x * imgW;
-            cropBoxY = cropTemplate.y * imgH;
-            cropBoxWidth = cropTemplate.width * imgW;
-            cropBoxHeight = cropTemplate.height * imgH;
-            updateCropBox();
-            showNotification('Plantilla aplicada a esta imagen');
-        }
-
-        function applyTemplateToAll() {
-            if (!cropTemplate) return;
-            templateAppliedToAll = true;
-            applyCropTemplate();
-            showNotification('Plantilla aplicada a todas las imágenes');
-        }
-
-        function updateTemplateButtons() {
-            applyTemplateBtn.disabled = !cropTemplate;
-            applyToAllBtn.disabled = !cropTemplate;
-        }
-
-        // ===== PROCESAR TODAS =====
-        function processAllImages() {
-            if (imageFiles.length === 0) return;
-            if (cropTemplate) templateAppliedToAll = true;
-
-            const processNext = (index) => {
-                if (index >= imageFiles.length) {
-                    showNotification('Todas las imágenes procesadas');
+            // ===== GENERAR PDF =====
+            function generatePdf() {
+                if (savedChessboards.length === 0) return;
+                if (typeof window.jspdf === 'undefined') {
+                    showNotification('❌ Librería no cargada. Verifica tu conexión y recarga.', true);
                     return;
                 }
-                currentImageIndex = index;
-                loadCurrentImage();
-                setTimeout(() => {
-                    const data = cropImage();
-                    if (data) {
-                        savedChessboards.push(data);
-                        updateChessboardsDisplay();
-                        processNext(index + 1);
+                if (isProcessing) return;
+                isProcessing = true;
+                const originalText = generatePdfBtn.innerHTML;
+                generatePdfBtn.disabled = true;
+                generatePdfBtn.innerHTML = '<span class="processing-spinner"></span> Generando...';
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('p', 'mm', 'a4');
+                    const itemsPerPage = 6;
+                    const imgWidth = 58.5;
+                    const imgHeight = 58.5;
+                    const positions = [
+                        { x: 27, y: 40 }, { x: 122, y: 40 },
+                        { x: 27, y: 120 }, { x: 122, y: 120 },
+                        { x: 27, y: 200 }, { x: 122, y: 200 }
+                    ];
+                    const headerText = headerInput.value;
+                    const footerText = footerInput.value;
+
+                    for (let i = 0; i < savedChessboards.length; i++) {
+                        const pageIdx = Math.floor(i / itemsPerPage);
+                        const posIdx = i % itemsPerPage;
+                        if (posIdx === 0 && i > 0) doc.addPage();
+
+                        if (headerText) {
+                            doc.setFontSize(12);
+                            doc.text(headerText, 105, 20, { align: 'center' });
+                        }
+                        const cx = positions[posIdx].x + imgWidth / 2;
+                        doc.setFontSize(12);
+                        doc.text(`${i+1}`, cx, positions[posIdx].y - 2.5, { align: 'center' });
+                        doc.addImage(
+                            savedChessboards[i],
+                            'JPEG',
+                            positions[posIdx].x,
+                            positions[posIdx].y,
+                            imgWidth,
+                            imgHeight,
+                            undefined,
+                            'FAST'
+                        );
+                        const lineY = positions[posIdx].y + imgHeight + 6;
+                        for (let j = 0; j < 3; j++) {
+                            doc.line(
+                                positions[posIdx].x,
+                                lineY + j * 4,
+                                positions[posIdx].x + imgWidth,
+                                lineY + j * 4
+                            );
+                        }
+                        if (footerText) {
+                            doc.setFontSize(10);
+                            doc.text(footerText, 105, 287, { align: 'center' });
+                        }
                     }
-                }, 500);
-            };
-            processNext(0);
-        }
-
-        function clearAllChessboards() {
-            if (savedChessboards.length === 0) return;
-            if (confirm('¿Eliminar todos los tableros guardados?')) {
-                savedChessboards = [];
-                updateChessboardsDisplay();
-                showNotification('Todos los tableros eliminados');
+                    doc.save('ejercicios_ajedrez.pdf');
+                    showNotification('PDF generado y descargado');
+                } catch (err) {
+                    console.error(err);
+                    showNotification('❌ Error al generar el PDF.', true);
+                } finally {
+                    isProcessing = false;
+                    generatePdfBtn.disabled = false;
+                    generatePdfBtn.innerHTML = originalText;
+                }
             }
-        }
 
-        // ===== FUNCIÓN PARA AGREGAR LISTENERS CON RESPUESTA TÁCTIL =====
-        function addSafeListener(element, event, handler) {
-            if (!element) return;
-            element.addEventListener(event, handler);
-            if (event === 'click') {
-                element.addEventListener('touchstart', function(e) {
-                    if (!this.disabled) {
-                        handler.call(this, e);
+            // ===== NAVEGACIÓN DE IMÁGENES =====
+            function loadCurrentImage() {
+                if (imageFiles.length === 0) {
+                    showNotification('⚠️ No hay imágenes cargadas.', true);
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    originalImage = new Image();
+                    originalImage.onload = function() {
+                        imageToCrop.src = e.target.result;
+                        setTimeout(initCropBox, 100);
+                    };
+                    originalImage.src = e.target.result;
+                };
+                reader.onerror = function() {
+                    showNotification('❌ Error al leer la imagen.', true);
+                };
+                reader.readAsDataURL(imageFiles[currentImageIndex]);
+                imageCounter.textContent = `Imagen ${currentImageIndex+1} de ${imageFiles.length}`;
+                prevImageBtn.disabled = currentImageIndex === 0;
+                nextImageBtn.disabled = currentImageIndex === imageFiles.length - 1;
+                updateDiagnostic();
+            }
+
+            function prevImage() {
+                if (currentImageIndex > 0) { currentImageIndex--; loadCurrentImage(); }
+            }
+            function nextImage() {
+                if (currentImageIndex < imageFiles.length - 1) { currentImageIndex++; loadCurrentImage(); }
+            }
+
+            // ===== PLANTILLAS =====
+            function saveCropTemplate() {
+                if (!cropBox) return;
+                const { w, h } = getImageDisplayDimensions();
+                cropTemplate = {
+                    x: cropBoxX / w,
+                    y: cropBoxY / h,
+                    width: cropBoxWidth / w,
+                    height: cropBoxHeight / h
+                };
+                showNotification('Plantilla guardada');
+                updateTemplateButtons();
+            }
+
+            function applyCropTemplate() {
+                if (!cropTemplate) return;
+                const { w, h } = getImageDisplayDimensions();
+                cropBoxX = cropTemplate.x * w;
+                cropBoxY = cropTemplate.y * h;
+                cropBoxWidth = cropTemplate.width * w;
+                cropBoxHeight = cropTemplate.height * h;
+                updateCropBox();
+                showNotification('Plantilla aplicada a esta imagen');
+            }
+
+            function applyTemplateToAll() {
+                if (!cropTemplate) return;
+                templateAppliedToAll = true;
+                applyCropTemplate();
+                showNotification('Plantilla aplicada a todas las imágenes');
+            }
+
+            function updateTemplateButtons() {
+                applyTemplateBtn.disabled = !cropTemplate;
+                applyToAllBtn.disabled = !cropTemplate;
+            }
+
+            // ===== PROCESAR TODAS (ASÍNCRONO SEGURO) =====
+            function processAllImages() {
+                if (imageFiles.length === 0 || isProcessing) return;
+                if (cropTemplate) templateAppliedToAll = true;
+                isProcessing = true;
+                const originalText = processAllBtn.innerHTML;
+                processAllBtn.disabled = true;
+                processAllBtn.innerHTML = '<span class="processing-spinner"></span> Procesando...';
+
+                let index = 0;
+                function processNext() {
+                    if (index >= imageFiles.length) {
+                        showNotification('Todas las imágenes procesadas');
+                        isProcessing = false;
+                        processAllBtn.disabled = false;
+                        processAllBtn.innerHTML = originalText;
+                        updateDiagnostic();
+                        return;
                     }
-                }, { passive: true });
+                    currentImageIndex = index;
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        originalImage = new Image();
+                        originalImage.onload = function() {
+                            imageToCrop.src = e.target.result;
+                            // Asegurar que el crop box se inicializa con plantilla si existe
+                            setTimeout(() => {
+                                if (cropTemplate) {
+                                    const { w, h } = getImageDisplayDimensions();
+                                    cropBoxX = cropTemplate.x * w;
+                                    cropBoxY = cropTemplate.y * h;
+                                    cropBoxWidth = cropTemplate.width * w;
+                                    cropBoxHeight = cropTemplate.height * h;
+                                    updateCropBox();
+                                }
+                                const data = cropImage();
+                                if (data) {
+                                    savedChessboards.push(data);
+                                    updateChessboardsDisplay();
+                                }
+                                index++;
+                                processNext();
+                            }, 200);
+                        };
+                        originalImage.onerror = function() {
+                            showNotification('❌ Error al cargar imagen ' + (index+1), true);
+                            index++;
+                            processNext();
+                        };
+                        originalImage.src = e.target.result;
+                    };
+                    reader.onerror = function() {
+                        showNotification('❌ Error al leer archivo ' + (index+1), true);
+                        index++;
+                        processNext();
+                    };
+                    reader.readAsDataURL(imageFiles[index]);
+                }
+                processNext();
             }
-        }
 
-        // ===== EVENT LISTENERS MEJORADOS =====
-        // Evento change del input: detecta archivos
-        addSafeListener(imageInput, 'change', function() {
-            const hasFiles = this.files && this.files.length > 0;
-            if (hasFiles) {
-                imageFiles = Array.from(this.files);
-                loadImageBtn.disabled = false;
-                showNotification(`✅ ${imageFiles.length} imagen(es) seleccionada(s)`);
-                updateDiagnostic();
-            } else {
-                imageFiles = [];
-                loadImageBtn.disabled = true;
-                updateDiagnostic();
-            }
-        });
-
-        // Evento click del botón "Cargar Imágenes" con verificación extra
-        addSafeListener(loadImageBtn, 'click', function() {
-            // Verificar si hay archivos en el input aunque imageFiles esté vacío
-            if (imageFiles.length === 0 && imageInput.files && imageInput.files.length > 0) {
-                imageFiles = Array.from(imageInput.files);
-                loadImageBtn.disabled = false;
-                showNotification(`✅ Recuperados ${imageFiles.length} archivo(s) automáticamente`);
-                updateDiagnostic();
+            function clearAllChessboards() {
+                if (savedChessboards.length === 0) return;
+                if (confirm('¿Eliminar todos los tableros guardados?')) {
+                    savedChessboards = [];
+                    updateChessboardsDisplay();
+                    showNotification('Todos los tableros eliminados');
+                }
             }
 
-            if (imageFiles.length === 0) {
-                showNotification('⚠️ Primero selecciona imágenes usando "Examinar".');
-                return;
-            }
-
-            cropSection.classList.remove('hidden');
-            loadCurrentImage();
-            updateDiagnostic();
-        });
-
-        // Clic en el input file (para móviles que no disparan change bien)
-        imageInput.addEventListener('click', function() {
-            // Forzamos una comprobación después de un breve retraso
-            setTimeout(() => {
+            // ===== EVENT LISTENERS =====
+            imageInput.addEventListener('change', function() {
                 if (this.files && this.files.length > 0) {
                     imageFiles = Array.from(this.files);
                     loadImageBtn.disabled = false;
                     showNotification(`✅ ${imageFiles.length} imagen(es) seleccionada(s)`);
                     updateDiagnostic();
+                } else {
+                    imageFiles = [];
+                    loadImageBtn.disabled = true;
+                    updateDiagnostic();
                 }
-            }, 500);
-        });
+            });
 
-        // Resto de botones
-        addSafeListener(cropBtn, 'click', function() {
-            const data = cropImage();
-            if (data) {
-                addChessboard(data);
-                previewSection.classList.remove('hidden');
+            // Recuperación si el evento change no disparó (ej. mismo archivo)
+            imageInput.addEventListener('click', function() {
+                setTimeout(() => {
+                    if (this.files && this.files.length > 0 && imageFiles.length === 0) {
+                        imageFiles = Array.from(this.files);
+                        loadImageBtn.disabled = false;
+                        showNotification(`✅ ${imageFiles.length} imagen(es) detectada(s)`);
+                        updateDiagnostic();
+                    }
+                }, 600);
+            });
+
+            loadImageBtn.addEventListener('click', function() {
+                if (imageFiles.length === 0 && imageInput.files && imageInput.files.length > 0) {
+                    imageFiles = Array.from(imageInput.files);
+                    loadImageBtn.disabled = false;
+                    showNotification(`✅ Recuperados ${imageFiles.length} archivo(s)`);
+                    updateDiagnostic();
+                }
+                if (imageFiles.length === 0) {
+                    showNotification('⚠️ Selecciona imágenes primero.', true);
+                    return;
+                }
+                cropSection.classList.remove('hidden');
+                loadCurrentImage();
+                // Limpiar input para permitir re-selección del mismo archivo
+                imageInput.value = '';
                 updateDiagnostic();
-            } else {
-                showNotification('❌ No se pudo recortar la imagen. Asegúrate de que el recuadro esté sobre la imagen.');
-            }
-        });
+            });
 
-        addSafeListener(prevImageBtn, 'click', prevImage);
-        addSafeListener(nextImageBtn, 'click', nextImage);
-        addSafeListener(generatePdfBtn, 'click', generatePdf);
+            cropBtn.addEventListener('click', function() {
+                const data = cropImage();
+                if (data) {
+                    addChessboard(data);
+                    previewSection.classList.remove('hidden');
+                } else {
+                    showNotification('❌ No se pudo recortar. Ajusta el recuadro.', true);
+                }
+                updateDiagnostic();
+            });
 
-        qualitySlider.addEventListener('input', function() {
-            imageQuality = parseFloat(this.value);
-            qualityValue.textContent = this.value;
-        });
-        resolutionSelect.addEventListener('change', function() {
-            resolutionFactor = parseFloat(this.value);
-        });
+            prevImageBtn.addEventListener('click', prevImage);
+            nextImageBtn.addEventListener('click', nextImage);
+            generatePdfBtn.addEventListener('click', generatePdf);
+            resetCropBtn.addEventListener('click', resetCropBox);
 
-        addSafeListener(saveTemplateBtn, 'click', saveCropTemplate);
-        addSafeListener(applyTemplateBtn, 'click', applyCropTemplate);
-        addSafeListener(applyToAllBtn, 'click', applyTemplateToAll);
-        addSafeListener(processAllBtn, 'click', processAllImages);
-        addSafeListener(clearAllBtn, 'click', clearAllChessboards);
+            qualitySlider.addEventListener('input', function() {
+                imageQuality = parseFloat(this.value);
+                qualityValue.textContent = this.value;
+            });
+            resolutionSelect.addEventListener('change', function() {
+                resolutionFactor = parseFloat(this.value);
+            });
 
-        headerInput.addEventListener('input', updatePdfPreview);
-        footerInput.addEventListener('input', updatePdfPreview);
+            saveTemplateBtn.addEventListener('click', saveCropTemplate);
+            applyTemplateBtn.addEventListener('click', applyCropTemplate);
+            applyToAllBtn.addEventListener('click', applyTemplateToAll);
+            processAllBtn.addEventListener('click', processAllImages);
+            clearAllBtn.addEventListener('click', clearAllChessboards);
 
-        // ===== DIAGNÓSTICO INICIAL =====
-        updateDiagnostic();
+            headerInput.addEventListener('input', updatePdfPreview);
+            footerInput.addEventListener('input', updatePdfPreview);
 
-        // ===== CAPTURAR ERRORES =====
-        window.addEventListener('error', function (e) {
-            console.error('Error capturado:', e.error || e.message);
-            showNotification('❌ Ocurrió un error inesperado. Revisa la consola (F12) para más detalles.');
-        });
+            // Inicialización
+            updateDiagnostic();
 
-        console.log('✅ ChessExtract Pro cargado correctamente.');
-        console.log('📱 Dispositivo táctil:', 'ontouchstart' in window);
-        console.log('📦 Archivos en input:', imageInput.files ? imageInput.files.length : 0);
+            window.addEventListener('error', function(e) {
+                console.error('Error capturado:', e.error || e.message);
+                showNotification('❌ Error inesperado. Revisa consola.', true);
+            });
+
+            console.log('✅ ChessExtract Pro cargado correctamente.');
+            console.log('📱 Dispositivo táctil:', 'ontouchstart' in window || navigator.maxTouchPoints > 0);
+        })();
     </script>
 </body>
 </html>
