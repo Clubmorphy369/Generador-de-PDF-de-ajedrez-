@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ... (el CSS se mantiene igual, solo añadir al final) */
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -162,8 +161,7 @@
             border: 1px solid #ddd;
             border-radius: var(--border-radius);
             background: #f9f9f9;
-            /* Cambiamos a none para evitar que el navegador capture gestos de zoom/pan */
-            touch-action: none;
+            /* Quitamos touch-action: none para no interferir con otros elementos */
         }
 
         #imageToCrop {
@@ -181,7 +179,7 @@
             background-color: rgba(52,152,219,0.15);
             cursor: move;
             box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
-            touch-action: none;
+            touch-action: none;  /* Solo el recuadro captura gestos táctiles */
             will-change: left, top, width, height;
         }
 
@@ -424,7 +422,6 @@
     </style>
 </head>
 <body>
-    <!-- El HTML permanece igual -->
     <div class="app-container">
         <header class="app-header">
             <h1><i class="fas fa-chess-board"></i> ChessExtract Pro</h1>
@@ -583,9 +580,13 @@
         let cropTemplate = null;
         let templateAppliedToAll = false;
 
-        // Variables para controlar listeners
-        let cropListenersAttached = false;
-        let globalListenersAttached = false;
+        // Referencias para remover listeners
+        let cropEventHandlers = {
+            dragStart: null,
+            resizeStart: null,
+            move: null,
+            end: null
+        };
 
         const imageInput = document.getElementById('imageInput');
         const loadImageBtn = document.getElementById('loadImageBtn');
@@ -616,7 +617,7 @@
         const processAllBtn = document.getElementById('processAllBtn');
         const clearAllBtn = document.getElementById('clearAllBtn');
 
-        // --- Funciones auxiliares de eventos ---
+        // --- Funciones de eventos del crop box ---
         function onDragStart(e) {
             if (e.target.classList.contains('resize-handle')) return;
             isDragging = true;
@@ -624,8 +625,8 @@
             const clientY = e.clientY || (e.touches && e.touches[0].clientY);
             startX = clientX;
             startY = clientY;
-            cropBoxX = parseInt(cropBox.style.left);
-            cropBoxY = parseInt(cropBox.style.top);
+            cropBoxX = parseInt(cropBox.style.left) || 0;
+            cropBoxY = parseInt(cropBox.style.top) || 0;
             e.preventDefault();
         }
 
@@ -635,10 +636,10 @@
             const clientY = e.clientY || (e.touches && e.touches[0].clientY);
             startX = clientX;
             startY = clientY;
-            cropBoxX = parseInt(cropBox.style.left);
-            cropBoxY = parseInt(cropBox.style.top);
-            cropBoxWidth = parseInt(cropBox.style.width);
-            cropBoxHeight = parseInt(cropBox.style.height);
+            cropBoxX = parseInt(cropBox.style.left) || 0;
+            cropBoxY = parseInt(cropBox.style.top) || 0;
+            cropBoxWidth = parseInt(cropBox.style.width) || 0;
+            cropBoxHeight = parseInt(cropBox.style.height) || 0;
             resizeDirection = e.target.classList[1];
             e.preventDefault();
         }
@@ -662,11 +663,13 @@
         }
 
         function performMove(dx, dy) {
+            const imgWidth = imageToCrop.width;
+            const imgHeight = imageToCrop.height;
             if (isDragging) {
                 const newX = cropBoxX + dx;
                 const newY = cropBoxY + dy;
-                if (newX >= 0 && newX + cropBoxWidth <= imageToCrop.width) cropBoxX = newX;
-                if (newY >= 0 && newY + cropBoxHeight <= imageToCrop.height) cropBoxY = newY;
+                if (newX >= 0 && newX + cropBoxWidth <= imgWidth) cropBoxX = newX;
+                if (newY >= 0 && newY + cropBoxHeight <= imgHeight) cropBoxY = newY;
             } else if (isResizing) {
                 switch (resizeDirection) {
                     case 'resize-nw':
@@ -698,11 +701,10 @@
             cropBox.style.height = `${cropBoxHeight}px`;
         }
 
-        // --- Inicialización de eventos del crop box ---
+        // --- Inicialización y limpieza de eventos del crop box ---
         function attachCropBoxEvents() {
             if (!cropBox) return;
-            // Si ya hay listeners, los removemos antes de agregar nuevos
-            detachCropBoxEvents();
+            detachCropBoxEvents(); // siempre limpiamos antes de agregar
 
             const handles = cropBox.querySelectorAll('.resize-handle');
             handles.forEach(handle => {
@@ -713,11 +715,11 @@
             cropBox.addEventListener('mousedown', onDragStart);
             cropBox.addEventListener('touchstart', onDragStart, { passive: false });
 
-            cropListenersAttached = true;
+            // Guardamos referencias para posible limpieza adicional (opcional)
         }
 
         function detachCropBoxEvents() {
-            if (!cropBox || !cropListenersAttached) return;
+            if (!cropBox) return;
             const handles = cropBox.querySelectorAll('.resize-handle');
             handles.forEach(handle => {
                 handle.removeEventListener('mousedown', onResizeStart);
@@ -725,17 +727,14 @@
             });
             cropBox.removeEventListener('mousedown', onDragStart);
             cropBox.removeEventListener('touchstart', onDragStart);
-            cropListenersAttached = false;
         }
 
-        // --- Eventos globales (una sola vez) ---
+        // --- Eventos globales (se agregan una sola vez) ---
         function attachGlobalEvents() {
-            if (globalListenersAttached) return;
             document.addEventListener('mousemove', onMove);
             document.addEventListener('mouseup', onEnd);
             document.addEventListener('touchmove', onMove, { passive: false });
             document.addEventListener('touchend', onEnd, { passive: false });
-            globalListenersAttached = true;
         }
 
         // --- Inicialización del crop box ---
@@ -743,7 +742,6 @@
             cropBox = document.querySelector('.crop-box');
             if (!cropBox) return;
 
-            // Si no hay plantilla o no se ha aplicado a todas, calcular recuadro inicial
             if (cropTemplate && templateAppliedToAll) {
                 applyCropTemplate();
             } else if (!cropTemplate) {
@@ -756,21 +754,19 @@
                 updateCropBox();
             }
 
-            // Siempre mostrar y habilitar
             cropBox.classList.remove('hidden');
             cropBtn.disabled = false;
             attachCropBoxEvents();
             updateTemplateButtons();
         }
 
-        // --- Limpieza al cambiar de imagen ---
         function cleanupCropBox() {
             detachCropBoxEvents();
             if (cropBox) cropBox.classList.add('hidden');
             cropBtn.disabled = true;
         }
 
-        // --- Funciones de recorte y guardado (sin cambios) ---
+        // --- Funciones de recorte y guardado ---
         function cropImage() {
             if (!originalImage || !cropBox) return null;
             const canvasWidth = cropBoxWidth * resolutionFactor;
@@ -818,12 +814,13 @@
 
         function resetCropSection() {
             cropSection.classList.add('hidden');
-            imageInput.value = '';
-            loadImageBtn.disabled = true;
-            imageFiles = [];
-            currentImageIndex = 0;
+            // No limpiamos imageFiles ni currentImageIndex para permitir recargar
+            // Pero reseteamos el estado de plantilla
             templateAppliedToAll = false;
             cleanupCropBox();
+            // Habilitamos el botón de carga nuevamente
+            loadImageBtn.disabled = false;
+            imageInput.value = ''; // limpiar input
         }
 
         function startEdit(index) {
@@ -832,9 +829,7 @@
             originalImage.onload = function() {
                 imageToCrop.src = savedChessboards[index];
                 cropSection.classList.remove('hidden');
-                // Esperar a que la imagen se cargue en el DOM
                 setTimeout(() => {
-                    // Forzar dimensiones del crop box
                     cropBox = document.querySelector('.crop-box');
                     if (cropBox) {
                         const imgWidth = imageToCrop.width;
@@ -851,6 +846,7 @@
             originalImage.src = savedChessboards[index];
         }
 
+        // --- Actualizar display de tableros y PDF ---
         function updateChessboardsDisplay() {
             chessboardsContainer.innerHTML = '';
             chessboardsCount.textContent = savedChessboards.length;
@@ -1008,19 +1004,22 @@
         // --- Carga de imágenes ---
         function loadCurrentImage() {
             if (imageFiles.length === 0) return;
-            cleanupCropBox(); // Limpiar eventos anteriores
+            cleanupCropBox();
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 originalImage = new Image();
                 originalImage.onload = function() {
                     imageToCrop.src = e.target.result;
-                    // Esperar a que el navegador renderice la imagen
+                    // Esperar a que la imagen se renderice
                     setTimeout(() => {
                         initCropBox();
                     }, 150);
                 };
                 originalImage.src = e.target.result;
+            };
+            reader.onerror = function() {
+                showNotification("Error al leer la imagen", true);
             };
             reader.readAsDataURL(imageFiles[currentImageIndex]);
             imageCounter.textContent = `Imagen ${currentImageIndex + 1} de ${imageFiles.length}`;
@@ -1088,14 +1087,23 @@
                 }
                 currentImageIndex = index;
                 loadCurrentImage();
-                setTimeout(() => {
+                // Esperar a que se inicialice el crop box y luego recortar
+                const waitForCrop = () => {
+                    if (!cropBox || cropBox.classList.contains('hidden')) {
+                        setTimeout(waitForCrop, 200);
+                        return;
+                    }
                     const croppedImageData = cropImage();
                     if (croppedImageData) {
                         savedChessboards.push(croppedImageData);
                         updateChessboardsDisplay();
                         processNextImage(index + 1);
+                    } else {
+                        showNotification("Error al procesar imagen " + (index+1), true);
+                        processNextImage(index + 1);
                     }
-                }, 500);
+                };
+                setTimeout(waitForCrop, 300);
             };
             processNextImage(0);
         }
@@ -1114,11 +1122,15 @@
             }
         }
 
-        // --- Event Listeners de los botones (sin cambios) ---
+        // --- Event Listeners de la UI ---
         imageInput.addEventListener('change', function() {
-            loadImageBtn.disabled = !this.files || this.files.length === 0;
-            if (this.files && this.files.length > 0) {
-                imageFiles = Array.from(this.files);
+            const files = this.files;
+            if (files && files.length > 0) {
+                imageFiles = Array.from(files);
+                loadImageBtn.disabled = false;
+            } else {
+                imageFiles = [];
+                loadImageBtn.disabled = true;
             }
         });
 
@@ -1133,6 +1145,8 @@
             if (croppedImageData) {
                 addChessboard(croppedImageData);
                 previewSection.classList.remove('hidden');
+            } else {
+                showNotification("No se pudo recortar la imagen", true);
             }
         });
 
@@ -1158,7 +1172,7 @@
         headerInput.addEventListener('input', updatePdfPreview);
         footerInput.addEventListener('input', updatePdfPreview);
 
-        // --- Inicialización global ---
+        // Inicializar eventos globales (una sola vez)
         attachGlobalEvents();
     </script>
 </body>
